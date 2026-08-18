@@ -1,0 +1,133 @@
+
+
+
+The Wat Inspector:
+    A version of wat with a gui for running with pyqt5.
+
+
+----------------------- Table of Contents -----------------
+
+ 
+---- Why
+---- How To Use 
+---- Example Use
+---- Author 
+---- Ask a ChatBot
+---- Work still to do
+
+----------------------- Contents -----------------
+
+---- Why ----------------------------------------
+
+    This application inspects object using the wat-inspector libary. 
+        wat-inspector · PyPI
+        https://pypi.org/project/wat-inspector/
+
+---- How To Use ----------------------------------------
+
+    You can choose object to inspect in a number of ways:
+
+        The local variables ( at the time the tool is invoked ) appear in a list
+        at the left, the heading is "Locals".  Click on a name and the inspection
+        report appears in the lower text widget.
+
+        You can also pick a global variable to inspect: click on the the list headed with
+        "Globals"
+
+        Both locals and globals may be used in expressions next to the <Eval>  button;
+        enter your expression and press <Eval>.  The inspection will appear.  This
+        has all the risks that come with eval, so use some caution.
+
+        * <Cust Inspec> is for a feature that may be included in the future now
+                        it works on just a few types
+                        
+        * <Get Super>   Get a list of super classes for object using mro
+        
+        * <Obj Help>    attempts to get the help text for the object
+            
+        * <Obj Source>  attempts to get the soruce code for the object.
+                        It does not work for built-in functions, classes,
+
+        * <Where> gives a traceback to/from the location in code from which the
+                  tool was invoked, this may be useful if for some reason this location is
+                  in dobut.
+
+    ---- at the bottom of the window.
+
+    The text edit control is open for you to plop around in cut paste... whatever.
+
+        * <Up> and <Down> are for searching the text, you may be looking for something in particular.
+
+        * <Filter BoL>   Uses the text to its left and filters out all line that do not begin with
+                         that text. (Bol = Beninning of Line )
+                         Spaces at the beginning of the lines are ignored as is capitialization.
+                         Text may be typed or selected from a list.
+                         
+        * <Filter SoL>   Like <Filter BoL> but for test SoL = Somewhere in Line 
+                          
+                    def
+                    def set
+                    def show
+                    def get
+
+        * <Append File> the text is appended to "wat_inspector_out.txt"
+
+        * <Edit File> the file  "wat_inspector_out.txt"  is opened in your text editor.
+
+        * <Help> open this file in your text editor.
+
+        * <OK> closes the wat-inspector window.
+
+==== Preferences
+
+    This is now quite incomplete   
+    
+    
+---- Text Editor
+
+    # at the top of the file wat_inspector change the following:
+
+    TEXT_EDITOR       = r"xed"  # ADJUST FOR YOUR SYSTEM
+
+    # to the editor of your choice.
+
+---- Window Size
+
+    still need to implement, for now just change the code.
+
+
+---- Example Use:
+
+    * wat_app.py       a script with the wat-inspector
+    * qt_wat_app.py    a qt application with the wat-inspector
+
+    The inspector is extensively used in:
+
+    * qt_widgets.py
+    * qt_sql_widgets.py
+
+
+---- Author ----------------------------------------
+
+    https://github.com/russ-hensel/qt_by_example
+
+---- Ask a ChatBot --------------------------------------------------------------------------
+
+    How can I use introspection in python?
+
+
+---- Work still to do --------------------------------------------------------------------------
+
+    Fix prefreences doc,and perhaps implementation
+ 
+    Layout is not good.
+        Grid may be a mistake, revisit
+        
+    Custom Inspections are mostly not written.
+    
+    Lots, indluding this section
+        !! make eval a combobox   with self. ..... ?
+ 
+
+
+---- eof

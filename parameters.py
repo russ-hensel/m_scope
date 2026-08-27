@@ -21,7 +21,6 @@ import sys
 
 global PARAMETERS
 
-
 PARAMETERS   = None
 
 # ========================================
@@ -39,16 +38,7 @@ class Parameters( ):
         """
         self.new_user_mode()
         self.mode_dev_debug()
-        #self.mode_ram_disk_db()
-        #self.mode_russ_on_theprof()
-        #self.new_user_mode()
-        #self.mode_disk_db()
-        #self.millhouse_1_mode()
 
-        # two of my computers
-        #self.mode_millhouse_mint()
-        #self.mode_theprof_mint()
-        #self.russ_1_mode()
 
         # --- add on for testing, use as desired edit mode for your needs
         #self.plus_test_mode()
@@ -61,66 +51,6 @@ class Parameters( ):
         a new user may experiment here.
         """
         self.mode               = "mode new_user"
-        self.auto_run           = True
-
-        # ---- min_complete
-        self.min_complete       = 20  # minimum value for HOW_COMPLETE
-
-
-    # -------
-    def mode_dc_on_linux_mint( self ):
-        """
-
-        """
-        self.mode               = "mode_dc_on_linux_mint"
-
-
-    # -------
-    def mode_ram_disk_db( self ):
-        """
-        run for debugging when you want the db on a fast disk
-
-        /tmp/ramdisk/new_user.db
-        """
-        self.mode               = "mode_ram_disk_db"
-        # expose tabs that are not ready
-        self.min_complete       = 6 # minimum value for HOW_COMPLETE
-
-        # ---- search and default
-        self.default_search     = "progress"
-        self.do_search_on_init  = True
-
-        # ---- database there are 2 ........
-        # ---- for sample database
-        self.db_type            = "QSQLITE"
-        self.db_file_name        = "/tmp/ramdisk/qt_sql.db"
-
-        # ---- for qt tabs
-        self.tab_db_type         = "QSQLITE"
-        self.tab_db_file_name    = "/tmp/ramdisk/tab.db"
-
-    # -------
-    def mode_disk_db( self ):
-        """
-        run for debugging when you want the db on a disk
-        startup is really slow -- minutes
-        """
-        self.mode               = "mode_disk_db"
-        # expose tabs that are not ready
-        self.min_complete    = 0  # minimum value for HOW_COMPLETE
-
-        # ---- search and default
-        self.default_search     = "progress"
-        self.do_search_on_init  = True
-
-        # ---- database there are 2 ........
-        # ---- for sample database
-        self.db_type            = "QSQLITE"
-        self.db_file_name        = "./misc/qt_sql.db"
-
-        # ---- for qt tabs
-        self.tab_db_type         = "QSQLITE"
-        self.tab_db_file_name    = "./misc/tab.db"
 
     # -------
     def mode_dev_debug( self ):
@@ -128,28 +58,20 @@ class Parameters( ):
         for dev and debug, mostly for rsh
         """
         self.mode               = "mode_dev_debug"
-        # expose tabs that are not ready
-        self.min_complete    = 0  # minimum value for HOW_COMPLETE
 
-        self.note_default_text  = "note_default_text"
-
-        # ---- search and default
-
-        self.default_search     = ""
-        self.do_search_on_init  = True
-
-        # self.default_search     = "qq"
-        # self.do_search_on_init  = True
+         # # ---- output
+         # self.output_dir         = "./output"   #
+         # self.photo_dir          = "./output"   #
+         # self.reticle_dir        = "./misc"   #
+         # self.reticle_dict        =  { "4x":   "4x_reticle.png",
+         #                               "10x":  "10x_reticle.png"
+         #                             }
 
         # good for kingholmer
         self.qt_width           = 1500
         self.qt_height          = 600    # 700 most of win height
         self.qt_xpos            = 10
         self.qt_ypos            = 10
-
-        #self.dir_for_tabs.append(  "/mnt/WIN_D/russ/0000/python00/python3/_projects/stuffdb/qt_tabs"  )
-        #self.dir_for_tabs.append(  "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/stuffdb/pyqt_tabs" )
-        #self.dir_for_tabs.append( "./tabs/experiments" )
 
     # -------
     def running_on_tweaks(self,  ):
@@ -268,7 +190,6 @@ class Parameters( ):
             # name your config, it will show in app title
             # may be changed later in parameter init
 
-
         # ---- appearance size--
 
         # control initial size and position with:
@@ -293,7 +214,7 @@ class Parameters( ):
         self.text_editor        = "xed"
 
         # ---- overlay  defaults
-        self.default_ovelay     = "./misc/red_black_cross_2.jpg"  # file_name
+
         self.overlay_opacity    = 30
 
         self.blend_type         = "" # may need to move some enums
@@ -302,13 +223,21 @@ class Parameters( ):
         self.overlay_on_snap    = True   # switch to the overlay tab
 
         # ---- output
-        self.output_dir         = "./output"   # file name for the python logging
+        self.output_dir         = "./output"   #
+        self.photo_dir          = "./output"   #
+        self.reticle_dir        = "./misc"   #
+        self.reticle_dict        =  { "4x":   "4x_reticle.png",
+                                      "10x":  "10x_reticle.png"
+                                    }
+
+        # next now auto from reticle_dict, chang back ??
+        self.default_ovelay     = "./misc/red_black_cross_2.jpg"  # file_name
+
 
         # ---- logging
         self.pylogging_fn       = f"{self.output_dir}/app.py_log"   # file name for the python logging
 
         self.log_mode               = "w"    # "a" append "w" truncate and write
-
 
         self.logging_level      = logging.DEBUG         # may be very verbose
         self.logging_level      = logging.INFO
@@ -317,8 +246,6 @@ class Parameters( ):
         self.logger_id          = "qt_ex"         # id of app in logging file
 
         self.default_fn_functon   = None
-
-
 
 
         # self.breakpoint_ok      = True  # enable breakpoin button
@@ -352,25 +279,7 @@ class Parameters( ):
         self.help_path      =  "/mnt/WIN_D/russ/0000/python00/python3/_projects/qt5_by_example/docs/"
             # path leading to all docs and help
 
-        # # ---- dir_for_tabs:  the app will look for tabs in these directories
-        # self.dir_for_tabs       = [ "./",  ]
-        # self.dir_for_tabs       = [    ]
-        # #self.dir_for_tabs       = [ "/mnt/WIN_D/russ/0000/python00/python3/_projects/stuffdb/qt_tabs" ]
-        # #may need to be on path sys.path.insert( 1, f"{src_root}/_projects/stuffdb/qt_tabs" )
-        # self.dir_for_tabs.append( "./tabs/basic_widgets" )
-        # self.dir_for_tabs.append( "./tabs/sql_widgets" )
-        # self.dir_for_tabs.append( "./tabs/book_fitz" ) #  book_fitz
-        # self.dir_for_tabs.append( "./tabs/more" )
-        # self.dir_for_tabs.append( "./tabs/real_python" )
-        # self.dir_for_tabs.append( "./tabs/layouts" )
 
-        # # ---- min_complete
-        # self.min_complete    = 10  # minimum value for HOW_COMPLETE
-
-        # # ---- search and default
-        # self.default_search     = ""
-        # self.do_search_on_init  = False
-        #     # do search right away, typically if default_search != ""
 
     # -------
     def __init__( self, ):

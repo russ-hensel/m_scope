@@ -15,7 +15,8 @@ if __name__ == "__main__":
 # ---- imports
 import sys
 import os
-
+from   pathlib import Path
+from   functools import partial
 
 from qtpy import QtGui
 
@@ -26,6 +27,7 @@ from qtpy.QtWidgets import ( QComboBox,
                              QDoubleSpinBox,
                              QFileDialog,
                              QHBoxLayout,
+                             QMessageBox,
                              QTabWidget,
                              QLabel,
                              QPushButton,
@@ -67,8 +69,7 @@ COMPOSITION_MODES = [ ( "Normal ( over )", QPainter.CompositionMode.CompositionM
 IMAGE_FILTER    = ( "Images (*.png *.jpg *.jpeg *.bmp *.gif *.tif *.tiff *.webp);;All files (*)" )
 
 
-__VERSION__     = "ver_002 - 2026 08 17.01"
-
+__VERSION__     = "ver_03 - 2026 08 27.01"
 
 
 # -------------------------------
@@ -143,40 +144,82 @@ class MainWindow( QMainWindow ):
 
         layout.addWidget( self.tab_widget   )
 
+        # ---- notes
+        tab                     = note_tab.NoteTab()
+        self.note_tab           = tab
+        title                   = "Control\n and Notes"
+        self.tab_widget.addTab( tab, title  )
+
         tab                     = camera_tab.CameraTab()
         self.camera_tab         = tab
-        title                   = "Camera"
+        title                   = "Photo\nSnap"
         self.tab_widget.addTab( tab, title  )
 
         # ---- tab overlay
         tab                     = overlay_tab.OverlayTab()
         self.tab_overlay        = tab
-        title                   = "Overlay"
+        title                   = "Overlay\nMeasure"
         self.tab_widget.addTab( tab, title  )
 
-        # ---- notes
-        tab                     = note_tab.NoteTab()
-        self.note_tab           = tab
-        title                   = "Notes"
-        self.tab_widget.addTab( tab, title  )
+        for key, value in my_parameters.reticle_dict.items():
+            file_name           = ( my_parameters.reticle_dir + "/" + value ).replace( "//", "/" )
+            foo                 = partial( tab.load_overlay, file_name )
+            foo()
+            break
 
         my_parameters.test_init_2()
 
     # -------------------------------------
-    def get_fn_stem( self, ):
+    def get_fn_no_ext( self, ):
         """
         what it says
+            fn_no_ext = controller.get_fn_no_ext()
         """
         note_tab        = self.note_tab
         item_code       = self.note_tab.item_code_widget.text()
         # test for not blank
+        if not item_code:
+            msg_box_msg    = "Please add an Item Code"
+            msg_box        = QMessageBox()
+            msg_box.setIcon( QMessageBox.Information )
+            msg_box.setText(  msg_box_msg  )
+            msg_box.setWindowTitle( "We have a Problem" )
+            msg_box.setStandardButtons( QMessageBox.Ok )
+
+            ret    = msg_box.exec_( )
+            raise ValueError( )
+
         date_code       = self.note_tab.date_code_widget.date().toString(  'yyyy_MM_dd' )
         prefix          = f"{date_code}_{item_code}"
 
         file_stem       = utils.gen_fn_stem( prefix )  # import utils
+            # no path to, no ext
         note_tab.file_stem_widget.setText( file_stem )
 
-        return file_stem
+        parameters   = AppGlobal.parameters
+        output_dir   = parameters.output_dir
+
+        fn_no_ext    = f"{output_dir}/{file_stem}"
+            # all but ext
+
+        return fn_no_ext
+
+    # -------------------------------------
+    def get_file_name( self, fn_no_ext, ext ):
+        """
+        put extension on fn_no_ext
+            ext    like .txt
+            file_name     = controller.get_file_name( fn_no_ext, ext )
+        """
+        file_name    = fn_no_ext + ext
+
+        path         = Path( file_name )
+        path         = path.resolve( )
+
+        file_name    = str( path )
+
+        return file_name
+
 
     # #----------------------------
     # def on_button_click(self):
@@ -186,7 +229,9 @@ class MainWindow( QMainWindow ):
 
     # -------------------------------------
     def build_menu( self, ):
-        """ what it says """
+        """
+        what it says
+        """
         return
 
     # -------------------------------------

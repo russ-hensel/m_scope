@@ -1,0 +1,35 @@
+
+this material may be more up to date in or in requirements_qt6.txt
+in stuff db
+
+uv self update
+
+#mkdir  ~/python_uv_venv
+cd       ~/python_uv_venv
+# recursive and non-empty
+rm -r   py3_13_qt6
+
+
+
+uv       venv py3_13_qt6   --python 3.13
+
+source py3_13_qt6/bin/activate
+
+
+#  do these
+uv pip install pyqt6
+# but not spydeer
+# uv pip install spyder-terminal  think not this but maybe
+uv pip install spyder-kernels==3.1.*
+uv pip install pyqt6
+uv pip install qtpy
+uv pip install exifread
+uv pip install geopy
+uv pip install gpxpy
+uv pip install wat-inspector
+uv pip install pandas
+
+uv pip install PyQt6-WebEngine
+
+
+uv pip install PyQt6-Charts

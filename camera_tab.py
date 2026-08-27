@@ -17,7 +17,7 @@ if __name__ == "__main__":
 # ---- imports
 import sys
 import os
-from    pathlib import Path
+from   pathlib import Path
 
 from qtpy import QtGui
 
@@ -82,7 +82,7 @@ class CameraTab( QWidget ):
         view_layout         = QHBoxLayout(   )
         layout.addLayout( view_layout )
 
-        # ---- the widget of interest.  all it puts on screen is the live
+        # ---- Camera Capture
         # preview -- the combos and buttons that work it are built here and
         # drive it through its api, it answers through its signals
         a_widget            = CameraCaptureWidget(   )
@@ -207,8 +207,8 @@ class CameraTab( QWidget ):
         button_layout       = QHBoxLayout(   )
         layout.addLayout( button_layout )
 
-        # ---- "Snap Still"
-        a_widget            = QPushButton( "Snap Still" )
+        # ---- "Snap Photo"
+        a_widget            = QPushButton( "Snap Photo" )
         a_widget.clicked.connect( self.on_snap_still )
         self.snap_button    = a_widget
         button_layout.addWidget( a_widget )
@@ -273,22 +273,21 @@ class CameraTab( QWidget ):
         output_dir   = parameters.output_dir
 
         controller   = AppGlobal.controller
-        stem         = controller.get_fn_stem()
 
-        file_name    = stem + ".jpg"
+        try:
+            fn_no_ext         = controller.get_fn_no_ext()
+        except ValueError:
+            pass  #  message already issued
+            return
 
-        path         = Path( output_dir )   # not complete
-        path         = path.resolve( )
-        full_path    = path / file_name
-        file_name    = str( full_path )
+        file_name    = controller.get_file_name( fn_no_ext, "b.jbp" )
+
 
         # self._say( f"capture {capture_id} asked for: {file_name}" )  zz
         camera_widget.snap_still( file_name )
 
         pass  # file is not done yet even though snap_still is done need delay of some sort or test
         # may continue in self.on_image_saved
-
-
 
     # -------------------------------------
     def on_record_video( self, ):

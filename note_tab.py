@@ -17,7 +17,7 @@ if __name__ == "__main__":
 # ---- imports
 import sys
 import os
-
+from   pathlib import Path
 
 
 from qtpy import QtGui
@@ -25,7 +25,7 @@ from qtpy import QtGui
 from qtpy.QtCore import ( QDate,
                           QDateTime,
                           Qt,
-                          QTime)
+                          QTime )
 
 
 
@@ -81,55 +81,11 @@ class NoteTab( QWidget ):
         #self.build_gui_bot( layout )
         self.build_message_area( layout )
 
-    #----------------------------
-    def build_gui_widgetsxxx( self, main_layout  ):
-        """
-        the usual, build the gui with the widgets of interest
-        and the buttons for examples
-        """
-        layout              = QVBoxLayout(   )
-        main_layout.addLayout( layout )
-
-        # ---- the widget of interest.  it brings its own device and format
-        # combos, its own start/stop, preview, thumbnail, snap and record --
-        # everything about cameras.  this tab adds none of that
-        a_widget            = CameraCaptureWidget(   )
-
-        a_widget.image_saved_signal.connect( self.on_image_saved )
-        a_widget.video_saved_signal.connect( self.on_video_saved )
-        self.camera_widget  = a_widget
-        layout.addWidget( a_widget, 1 )
-
-        # ---- where the files go.  the ONE thing the widget does not decide,
-        # because it is an application question, not a camera question
-        dir_layout          = QHBoxLayout(   )
-        layout.addLayout( dir_layout )
-
-        a_widget            = QLabel( "Save to: ( not set yet )" )
-        self.save_dir_widget = a_widget
-        dir_layout.addWidget( a_widget )
-
-        a_widget            = QPushButton( "Change..." )
-        a_widget.clicked.connect( self.on_change_save_dir )
-        dir_layout.addWidget( a_widget )
-
-        a_widget            = QPushButton( "Default" )
-        a_widget.clicked.connect( self.on_default_save_dir )
-        dir_layout.addWidget( a_widget )
-
-        dir_layout.addStretch( 1 )
-
-        # # ---- buttons
-        # button_layout       = QHBoxLayout(   )
-        # layout.addLayout( button_layout )
-
-
     # -------------------------------
     def build_message_area( self, layout  ):
         """
 
         """
-
         # ---- new layout -- is it even needed
         my_layout       = QVBoxLayout(   )
         layout.addLayout( my_layout, )
@@ -137,10 +93,16 @@ class NoteTab( QWidget ):
         row_layout      = QHBoxLayout(   )
         my_layout.addLayout( row_layout, )
 
-        # ----
-        widget          =  QPushButton( "test1" )
+        # ---- dual_write
+        widget          =  QPushButton( "dual_write" )
         #self.output_edit    = widget
         widget.clicked.connect( self.test1    )
+        row_layout.addWidget( widget, )
+
+        # ----
+        widget          =  QPushButton( "write note" )
+        #self.output_edit    = widget
+        widget.clicked.connect( self.test2    )
         row_layout.addWidget( widget, )
 
         # ---- date
@@ -169,6 +131,8 @@ class NoteTab( QWidget ):
         self.file_stem_widget    = widget
         row_layout.addWidget( widget, )
 
+        row_layout.addStretch( 1 )
+
         # ----
         widget                  =  gui_qt_ext.MessageArea()
         self.message_area       = widget
@@ -178,12 +142,77 @@ class NoteTab( QWidget ):
     # -------------------------------
     def test1( self, ):
         """
+        dual_write
         """
-        controller   = AppGlobal.controller
-        print( controller.get_fn_stem() )
+        controller      = AppGlobal.controller
+        fn_no_ext       = controller.get_fn_no_ext()
+
+        try:
+            file_name       = controller.get_file_name( fn_no_ext, ".txt" )
+
+        except ValueError:
+            pass  #  message already issued
+            return
+
+        # tab_note        = controller.tab_note
+        # tab_note        = self
+        self.save_file( file_name )
+
+        file_name       = controller.get_file_name( fn_no_ext, ".jpg" )
+        tab_overlay     = controller.tab_overlay
+        tab_overlay.save_file( file_name )
+        pass
+
 
     # -------------------------------
-    def build_gui_bot( self, layout ):
+    def test2( self, ):
+        """
+        and see camera_tab.on_snap_still()
+        """
+        controller   = AppGlobal.controller
+        parameters   = AppGlobal.parameters
+
+        fn_stem      = controller.get_fn_stem()
+
+        output_dir   = parameters.output_dir
+
+        try:
+            stem         = controller.get_fn_stem()
+
+        except ValueError:
+            pass  #  message already issued
+            return
+
+        file_name    = stem + ".txt"
+
+        path         = Path( output_dir )   # not complete
+        path         = path.resolve( )
+        full_path    = path / file_name
+        file_name    = str( full_path )
+
+    # # -------------------------------------
+    # def save_text_file( self, file_stem ):
+    #     """
+    #     this will apply .txt and save
+    #         !! use pathlib
+    #     """
+    #     parameters  = AppGlobal.parameters
+
+    #     file_name   = f"{parameters.output_dir}{file_stem}.txt"
+        the_text    = self.message_area.get_plain_text()
+
+        with open(  file_name, 'w' ) as a_file:
+
+            # for i_line in a_list:
+            #     a_file.write( f"{i_line}\n" )  # note addition of \n
+            a_file.write( the_text )
+
+
+
+
+
+    # -------------------------------
+    def build_gui_botxxx( self, layout ):
         """
         from other code --- but not my message widget wht
             make the bottom of the gui, mostly the large
@@ -215,42 +244,15 @@ class NoteTab( QWidget ):
         self.output_edit    = widget
 
     # -------------------------------------
-    def save_result_file( self, file_stem ):
+    def save_file( self, file_name ):
         """
-        this will apply .txt and save
+        overrite
         """
-
-    # -------------------------------------
-    def save_image_file( self, file_stem ):
-        """
-        this will apply .txt and save
-        """
-
-
-    # -------------------------------------
-    def save_text_file( self, file_stem ):
-        """
-        this will apply .txt and save
-            !! use pathlib
-        """
-        parameters  = AppGlobal.parameters
-
-        file_name   = f"{parameters.output_dir}{file_stem}.txt"
         the_text    = self.message_area.get_plain_text()
 
         with open(  file_name, 'w' ) as a_file:
-
-            # for i_line in a_list:
-            #     a_file.write( f"{i_line}\n" )  # note addition of \n
             a_file.write( the_text )
 
-
-
-    # -------------------------------------
-    def construct_file_name( self,   ):
-        """
-        get date and item code
-        """
 
     # ---- next probably old junk  ----------------------------------------------------
 

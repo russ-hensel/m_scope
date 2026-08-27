@@ -17,7 +17,7 @@ if __name__ == "__main__":
 # ---- imports
 import sys
 import os
-
+from   functools import partial
 
 from qtpy import QtGui
 
@@ -74,184 +74,200 @@ class OverlayTab( QWidget  ):
         """
         the usual
         """
+        #breakpoint()
         super().__init__()
         layout          = QVBoxLayout( self )
         self.build_gui_widgets( layout )
 
-        self.last_dir   = "./misc"
+        self.last_dir   = "./misc"   # ! from parameters
+        #self.last_dir       = os.path.dirname( file_name )
 
         parameters      = AppGlobal.parameters
-        self.overlay_view.set_overlay_image( parameters .default_ovelay )
+        self.overlay_view.set_overlay_image( parameters.default_ovelay )
 
         self.on_opacity_changed( AppGlobal.parameters.overlay_opacity )
 
     #----------------------------
     def build_gui_widgets( self, main_layout ):
-       """
-       the usual, build the gui with the widgets of interest
-       and the buttons for examples
-       """
-       layout              = QVBoxLayout(   )
-       main_layout.addLayout( layout )
+        """
+        the usual, build the gui with the widgets of interest
+        and the buttons for examples
+        """
+        parameters          = AppGlobal.parameters
 
-       # ---- load layout
-       load_layout         = QHBoxLayout(   )
-       layout.addLayout( load_layout )
+        layout              = QVBoxLayout(   )
+        main_layout.addLayout( layout )
 
-       a_widget            = QPushButton( "Load Base..." )
-       a_widget.clicked.connect( self.on_load_base )
-       load_layout.addWidget( a_widget )
+        # ---- load layout
+        load_layout         = QHBoxLayout(   )
+        layout.addLayout( load_layout )
 
-       # ---- "Load Base\n from last snap..."
-       a_widget            = QPushButton( "Load Base\n from last snap..." )
-       a_widget.clicked.connect( self.load_base_from_last_snap )
-       load_layout.addWidget( a_widget )
 
-       a_widget            = QPushButton( "Load Overlay..." )
-       a_widget.clicked.connect( self.on_load_overlay )
-       load_layout.addWidget( a_widget )
+        # ---- load photo
+        a_widget            = QPushButton( "Load Photo..." )
+        a_widget.clicked.connect( self.on_load_base )
+        load_layout.addWidget( a_widget )
 
-       a_widget            = QPushButton( "Demo Images" )
-       a_widget.clicked.connect( self._load_demo_images )
-       load_layout.addWidget( a_widget )
+        # ---- "Load last snap..."
+        a_widget            = QPushButton( "Load last Photo" )
+        a_widget.clicked.connect( self.load_base_from_last_snap )
+        load_layout.addWidget( a_widget )
 
-       load_layout.addStretch( 1 )
 
-       a_widget            = QPushButton( "Save Result..." )
-       a_widget.clicked.connect( self.on_save_result )
-       load_layout.addWidget( a_widget )
+        #self.reticle_disptach = {}
+        for key, value in parameters.reticle_dict.items():
+            a_widget            = QPushButton( key )
+            file_name           = (parameters.reticle_dir + "/" + value ).replace( "//", "/" )
+            foo                 = partial( self.load_overlay, file_name )
+            a_widget.clicked.connect( foo )
+            load_layout.addWidget( a_widget )
 
-       # ----  ImageOverlayView
-       a_widget            = image_overlay_view.ImageOverlayView(   )
-       a_widget.setMinimumHeight( 320 )
-       a_widget.overlay_changed.connect( self.on_overlay_changed )
-       self.overlay_view   = a_widget
-       layout.addWidget( a_widget, 1 )
 
-       # ---- position / rotation / scale row.  these show what the mouse is
-       # doing and can also drive it, which is the only way to get an exact
-       # offset back after finding it once
-       pos_layout          = QHBoxLayout(   )
-       layout.addLayout( pos_layout )
+        a_widget            = QPushButton( "Load Reticle..." )
+        a_widget.clicked.connect( self.on_load_overlay )
+        load_layout.addWidget( a_widget )
 
-       a_widget            = QLabel( "X" )
-       pos_layout.addWidget( a_widget )
+        a_widget            = QPushButton( "Load Test Images" )
+        a_widget.clicked.connect( self._load_demo_images )
+        load_layout.addWidget( a_widget )
 
-       a_widget            = QSpinBox(   )
-       a_widget.setRange( -10000, 10000 )
-       a_widget.valueChanged.connect( self.on_offset_spin_changed )
-       self.x_spin         = a_widget
-       pos_layout.addWidget( a_widget )
+        load_layout.addStretch( 1 )
 
-       a_widget            = QLabel( "Y" )
-       pos_layout.addWidget( a_widget )
+        a_widget            = QPushButton( "Save..." )
+        a_widget.clicked.connect( self.on_save_result )
+        load_layout.addWidget( a_widget )
 
-       a_widget            = QSpinBox(   )
-       a_widget.setRange( -10000, 10000 )
-       a_widget.valueChanged.connect( self.on_offset_spin_changed )
-       self.y_spin         = a_widget
-       pos_layout.addWidget( a_widget )
+        # ----  ImageOverlayView
+        a_widget            = image_overlay_view.ImageOverlayView(   )
+        a_widget.setMinimumHeight( 320 )
+        a_widget.overlay_changed.connect( self.on_overlay_changed )
+        self.overlay_view   = a_widget
+        layout.addWidget( a_widget, 1 )
 
-       a_widget            = QLabel( "Rotation" )
-       pos_layout.addWidget( a_widget )
+        # ---- position / rotation / scale row.  these show what the mouse is
+        # doing and can also drive it, which is the only way to get an exact
+        # offset back after finding it once
+        pos_layout          = QHBoxLayout(   )
+        layout.addLayout( pos_layout )
 
-       a_widget            = QDoubleSpinBox(   )
-       a_widget.setRange( -360.0, 360.0 )
-       a_widget.setSingleStep( 0.5 )
-       a_widget.setDecimals( 2 )
-       a_widget.setSuffix( " deg" )
-       a_widget.valueChanged.connect( self.on_rotation_spin_changed )
-       self.rotation_spin  = a_widget
-       pos_layout.addWidget( a_widget )
+        a_widget            = QLabel( "X" )
+        pos_layout.addWidget( a_widget )
 
-       # ---- Scale
-       a_widget            = QLabel( "Scale" )
-       pos_layout.addWidget( a_widget )
+        a_widget            = QSpinBox(   )
+        a_widget.setRange( -10000, 10000 )
+        a_widget.valueChanged.connect( self.on_offset_spin_changed )
+        self.x_spin         = a_widget
+        pos_layout.addWidget( a_widget )
 
-       a_widget            = QDoubleSpinBox(   )
-       a_widget.setRange( 0.05, 20.0 )
-       a_widget.setSingleStep( 0.05 )
-       a_widget.setDecimals( 3 )
-       a_widget.setValue( 1.0 )
-       a_widget.valueChanged.connect( self.on_scale_spin_changed )
-       self.scale_spin     = a_widget
-       pos_layout.addWidget( a_widget )
+        a_widget            = QLabel( "Y" )
+        pos_layout.addWidget( a_widget )
 
-       # ---- reset
-       a_widget            = QPushButton( "Reset" )
-       a_widget.clicked.connect( self.on_reset_overlay )
-       pos_layout.addWidget( a_widget )
+        a_widget            = QSpinBox(   )
+        a_widget.setRange( -10000, 10000 )
+        a_widget.valueChanged.connect( self.on_offset_spin_changed )
+        self.y_spin         = a_widget
+        pos_layout.addWidget( a_widget )
 
-       pos_layout.addStretch( 1 )
+        a_widget            = QLabel( "Rotation" )
+        pos_layout.addWidget( a_widget )
 
-       # ---- look row: opacity, blend mode, blink, and the view's own zoom
-       look_layout         = QHBoxLayout(   )
-       layout.addLayout( look_layout )
+        a_widget            = QDoubleSpinBox(   )
+        a_widget.setRange( -360.0, 360.0 )
+        a_widget.setSingleStep( 0.5 )
+        a_widget.setDecimals( 2 )
+        a_widget.setSuffix( " deg" )
+        a_widget.valueChanged.connect( self.on_rotation_spin_changed )
+        self.rotation_spin  = a_widget
+        pos_layout.addWidget( a_widget )
 
-       # ---- Opacity
-       a_widget            = QLabel( "Opacity" )
-       look_layout.addWidget( a_widget )
+        # ---- Scale
+        a_widget            = QLabel( "Scale" )
+        pos_layout.addWidget( a_widget )
 
-       a_widget            = QSlider( Qt.Orientation.Horizontal )
-       a_widget.setRange( 0, 100 )
-       #a_widget.setValue( 100 )
-       a_widget.setValue( AppGlobal.parameters.overlay_opacity )  # may be too late or early
-       a_widget.setMaximumWidth( 160 )
-       a_widget.valueChanged.connect( self.on_opacity_changed )
-       self.opacity_slider = a_widget
-       look_layout.addWidget( a_widget )
+        a_widget            = QDoubleSpinBox(   )
+        a_widget.setRange( 0.05, 20.0 )
+        a_widget.setSingleStep( 0.05 )
+        a_widget.setDecimals( 3 )
+        a_widget.setValue( 1.0 )
+        a_widget.valueChanged.connect( self.on_scale_spin_changed )
+        self.scale_spin     = a_widget
+        pos_layout.addWidget( a_widget )
 
-       a_widget            = QLabel( "Blend" )
-       look_layout.addWidget( a_widget )
+        # ---- reset
+        a_widget            = QPushButton( "Reset" )
+        a_widget.clicked.connect( self.on_reset_overlay )
+        pos_layout.addWidget( a_widget )
 
-       a_widget            = QComboBox(   )
-       for i_name, i_mode in COMPOSITION_MODES:
-           a_widget.addItem( i_name )
-       a_widget.currentIndexChanged.connect( self.on_blend_changed )
-       self.blend_combo    = a_widget
-       look_layout.addWidget( a_widget )
+        pos_layout.addStretch( 1 )
 
-       # ---- blink: the eye catches a shift far better than it judges a
-       # steady overlay, so flick the top image on and off
-       a_widget            = QPushButton( "Blink" )
-       a_widget.setCheckable( True )
-       a_widget.toggled.connect( self.on_blink_toggled )
-       self.blink_button   = a_widget
-       look_layout.addWidget( a_widget )
+        # ---- look row: opacity, blend mode, blink, and the view's own zoom
+        look_layout         = QHBoxLayout(   )
+        layout.addLayout( look_layout )
 
-       blink_timer         = QTimer( self )
-       blink_timer.setInterval( BLINK_MS )
-       blink_timer.timeout.connect( self._blink_tick )
-       self.blink_timer    = blink_timer
+        # ---- Opacity
+        a_widget            = QLabel( "Opacity" )
+        look_layout.addWidget( a_widget )
 
-       look_layout.addStretch( 1 )
+        a_widget            = QSlider( Qt.Orientation.Horizontal )
+        a_widget.setRange( 0, 100 )
+        #a_widget.setValue( 100 )
+        a_widget.setValue( AppGlobal.parameters.overlay_opacity )  # may be too late or early
+        a_widget.setMaximumWidth( 160 )
+        a_widget.valueChanged.connect( self.on_opacity_changed )
+        self.opacity_slider = a_widget
+        look_layout.addWidget( a_widget )
 
-       # ---- view zoom.  NOT the overlay scale above -- this one only
-       # changes how big it looks, it is never part of what gets saved
-       a_widget            = QLabel( "View" )
-       look_layout.addWidget( a_widget )
+        a_widget            = QLabel( "Blend" )
+        look_layout.addWidget( a_widget )
 
-       a_widget            = QPushButton( "Fit" )
-       a_widget.clicked.connect( self.on_fit )
-       look_layout.addWidget( a_widget )
+        a_widget            = QComboBox(   )
+        for i_name, i_mode in COMPOSITION_MODES:
+            a_widget.addItem( i_name )
+        a_widget.currentIndexChanged.connect( self.on_blend_changed )
+        self.blend_combo    = a_widget
+        look_layout.addWidget( a_widget )
 
-       a_widget            = QPushButton( "1:1" )
-       a_widget.clicked.connect( self.overlay_view.zoom_reset )
-       look_layout.addWidget( a_widget )
+        # ---- blink: the eye catches a shift far better than it judges a
+        # steady overlay, so flick the top image on and off
+        a_widget            = QPushButton( "Blink" )
+        a_widget.setCheckable( True )
+        a_widget.toggled.connect( self.on_blink_toggled )
+        self.blink_button   = a_widget
+        look_layout.addWidget( a_widget )
 
-       a_widget            = QPushButton( "-" )
-       a_widget.setMaximumWidth( 32 )
-       a_widget.clicked.connect( self.overlay_view.zoom_out )
-       look_layout.addWidget( a_widget )
+        blink_timer         = QTimer( self )
+        blink_timer.setInterval( BLINK_MS )
+        blink_timer.timeout.connect( self._blink_tick )
+        self.blink_timer    = blink_timer
 
-       a_widget            = QPushButton( "+" )
-       a_widget.setMaximumWidth( 32 )
-       a_widget.clicked.connect( self.overlay_view.zoom_in )
-       look_layout.addWidget( a_widget )
+        look_layout.addStretch( 1 )
 
-       # ---- buttons
-       button_layout       = QHBoxLayout(   )
-       layout.addLayout( button_layout )
+        # ---- view zoom.  NOT the overlay scale above -- this one only
+        # changes how big it looks, it is never part of what gets saved
+        a_widget            = QLabel( "View" )
+        look_layout.addWidget( a_widget )
+
+        a_widget            = QPushButton( "Fit" )
+        a_widget.clicked.connect( self.on_fit )
+        look_layout.addWidget( a_widget )
+
+        a_widget            = QPushButton( "1:1" )
+        a_widget.clicked.connect( self.overlay_view.zoom_reset )
+        look_layout.addWidget( a_widget )
+
+        a_widget            = QPushButton( "-" )
+        a_widget.setMaximumWidth( 32 )
+        a_widget.clicked.connect( self.overlay_view.zoom_out )
+        look_layout.addWidget( a_widget )
+
+        a_widget            = QPushButton( "+" )
+        a_widget.setMaximumWidth( 32 )
+        a_widget.clicked.connect( self.overlay_view.zoom_in )
+        look_layout.addWidget( a_widget )
+
+        # ---- buttons
+        button_layout       = QHBoxLayout(   )
+        layout.addLayout( button_layout )
 
     # ---- loading -----------------------------------------------------------
 
@@ -320,8 +336,29 @@ class OverlayTab( QWidget  ):
         if not file_name:
             return
 
+        self.load_overlay( file_name )
+
         self.last_dir       = os.path.dirname( file_name )
 
+        if not self.overlay_view.set_overlay_image( file_name ):
+            print( f"could not load {file_name}" )
+            return
+
+        print( f"overlay image: {file_name}" )
+
+        a_pixmap            = self.overlay_view.overlay_item.pixmap()
+        if not a_pixmap.hasAlphaChannel():
+            msg                 = ( "note: that image has no alpha channel, so nothing will show "
+                                    "through it -- use the opacity slider or a blend mode instead" )
+            print( msg )
+
+
+    # -------------------------------------
+    def load_overlay( self, file_name ):
+        """
+        what it says -- and a word in the msg box if the image has no alpha,
+        since "nothing shows through" is otherwise a puzzling result
+        """
         if not self.overlay_view.set_overlay_image( file_name ):
             print( f"could not load {file_name}" )
             return
@@ -360,6 +397,28 @@ class OverlayTab( QWidget  ):
             print( msg )
         else:
             print( f"save FAILED to {file_name}" )
+
+    # -------------------------------------
+    def save_file( self, file_name ):
+        """
+
+        """
+        if not self.overlay_view.has_images():
+            print( "nothing to save -- load a base and an overlay first" )
+            return
+
+        # not sure about this
+        self.last_dir       = os.path.dirname( file_name )
+
+        is_ok               = self.overlay_view.save_result( file_name )
+
+        if is_ok:
+            a_image         = self.overlay_view.render_to_image()
+            msg             = ( f"saved {a_image.width()}x{a_image.height()} to {file_name}" )
+            print( msg )
+        else:
+            print( f"save FAILED to {file_name}" )
+
 
     # ---- the controls ------------------------------------------------------
 

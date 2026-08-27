@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# ---- tof
+"""
+Created on Wed Aug 19 17:23:32 2026
+
+@author: russ
+"""
+
+missing in rsh perhaps
+
+
+image_overlay_view'  in qt_by_example adjust_path should find
+
+
+
+
+

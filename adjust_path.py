@@ -15,7 +15,7 @@ import os
 import socket
 
 VERBOSE   = 10
-APP_DIR   = "/pyqt_by_example"
+APP_DIR   = "/m_scope"
 
 # adjust according to where I am -- in progress
 hostname              = socket.gethostname()
@@ -42,11 +42,12 @@ try:
     src_root   = cwd[ : ix   ]
     print( f"in try {src_root = }" )
 
+    print( "................................................." )
+
 except ValueError as error:
     # Access the first argument (the message)
     error_message = error.args[0]
     print(f"fallback to hostname")
-
 
     # fallbak may bo out of use out of date
 
@@ -75,7 +76,11 @@ sys.path.insert( 1, f"{src_root}/rshlib/in_spect" )
 sys.path.insert( 1, f"{src_root}/rshlib" )
 
 sys.path.insert( 1, f"{src_root}/pyqt_by_example" )
+sys.path.insert( 1, f"{src_root}/pyqt_by_example/tabs/more" )
+
+
 sys.path.insert( 1, "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/pyqt_by_example" )
+sys.path.insert( 1, "/home/russ/sync_with_bulldog/_projects/pyqt_by_example/image_overlay_view.py" )
 sys.path.insert( 1, "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/pyqt_by_example/tabs/more" )
 sys.path.insert( 1, "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/rshlib/rshlib_qt" )
 sys.path.insert( 1, "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/rshlib/utils" )
@@ -127,3 +132,9 @@ if VERBOSE > 9:
 
 
 # --- eof
+
+
+
+
+
+

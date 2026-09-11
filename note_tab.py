@@ -37,6 +37,7 @@ from qtpy.QtWidgets import ( QComboBox,
                              QHBoxLayout,
                              QTabWidget,
                              QTextEdit,
+                             QDialog,
                              QDateEdit,
                              QLabel,
                              QPushButton,
@@ -79,116 +80,44 @@ class NoteTab( QWidget ):
 
         # ---- try both
         #self.build_gui_bot( layout )
-        self.build_message_area( layout )
+        self.gui( layout )
 
     # -------------------------------
-    def build_message_area( self, layout  ):
+    def gui( self, layout ):
         """
-
+        what it says -- build the gui
         """
-        # ---- new layout -- is it even needed
-        my_layout       = QVBoxLayout(   )
-        layout.addLayout( my_layout, )
+        controller      = AppGlobal.controller
+        parameters      = AppGlobal.parameters
+        my_layout       = layout
 
-        row_layout      = QHBoxLayout(   )
-        my_layout.addLayout( row_layout, )
-
-        # ---- dual_write
-        widget          =  QPushButton( "dual_write" )
-        #self.output_edit    = widget
-        widget.clicked.connect( self.test1    )
-        row_layout.addWidget( widget, )
-
-        # ----
-        widget          =  QPushButton( "write note" )
-        #self.output_edit    = widget
-        widget.clicked.connect( self.test2    )
-        row_layout.addWidget( widget, )
-
-        # ---- date
-        widget                  =  QDateEdit(  )
-        self.date_code_widget   = widget
-        widget.setCalendarPopup( True )
-        today                   = QDate.currentDate()
-        widget.setDate( today )
-        # widget.setMinimumDate(QDate(1900, 1, 1))
-        # widget.setMaximumDate(QDate(2100, 12, 31))
-        widget.setDisplayFormat( "yyyy_MM_dd" )
-        row_layout.addWidget( widget, )
-
-        # ---- item code
-        widget          =  QLabel( "item code ->"  )
-        row_layout.addWidget( widget, )
-
-        # ---- item code widget
-        widget                   =  QLineEdit(  )
-        self.item_code_widget    = widget
-        row_layout.addWidget( widget, )
-
-        # ---- current file stem
-        # update on read or snap -- does snap save to a file
-        widget                   =  QLabel( "file_stem" )
-        self.file_stem_widget    = widget
-        row_layout.addWidget( widget, )
-
-        row_layout.addStretch( 1 )
-
-        # ----
-        widget                  =  gui_qt_ext.MessageArea()
+        # ---- message area
+        widget                  = gui_qt_ext.MessageArea()
         self.message_area       = widget
         #widget.clicked.connect( self.load    )
         my_layout.addWidget( widget, )
 
     # -------------------------------
-    def test1( self, ):
+    def microscope_widget_index_changed( self, microscope_widget_index_changed, ):
         """
-        dual_write
+        setup for a change in microscope, change reticle s
+            use a combo that  uses a dict, is it one of the models
         """
-        controller      = AppGlobal.controller
-        fn_no_ext       = controller.get_fn_no_ext()
-
-        try:
-            file_name       = controller.get_file_name( fn_no_ext, ".txt" )
-
-        except ValueError:
-            pass  #  message already issued
-            return
-
-        # tab_note        = controller.tab_note
-        # tab_note        = self
-        self.save_file( file_name )
-
-        file_name       = controller.get_file_name( fn_no_ext, ".jpg" )
-        tab_overlay     = controller.tab_overlay
-        tab_overlay.save_file( file_name )
-        pass
-
+        parameters      = AppGlobal.parameters
+        widget          = self.microscope_widget
+        ix              = widget.currentIndex()
+        keys            = list( parameters.scope_dict.keys() )
+        key             = keys[ix]  # same as current test
+        value           = parameters.scope_dict[ key ]
+        msg             = f"{key = } {value = }"
+        print( msg )
 
     # -------------------------------
-    def test2( self, ):
+    def display_string( self, text ):
         """
-        and see camera_tab.on_snap_still()
+        display_string
         """
-        controller   = AppGlobal.controller
-        parameters   = AppGlobal.parameters
-
-        fn_stem      = controller.get_fn_stem()
-
-        output_dir   = parameters.output_dir
-
-        try:
-            stem         = controller.get_fn_stem()
-
-        except ValueError:
-            pass  #  message already issued
-            return
-
-        file_name    = stem + ".txt"
-
-        path         = Path( output_dir )   # not complete
-        path         = path.resolve( )
-        full_path    = path / file_name
-        file_name    = str( full_path )
+        self.message_area.display_string( text )
 
     # # -------------------------------------
     # def save_text_file( self, file_stem ):
@@ -208,41 +137,6 @@ class NoteTab( QWidget ):
             a_file.write( the_text )
 
 
-
-
-
-    # -------------------------------
-    def build_gui_botxxx( self, layout ):
-        """
-        from other code --- but not my message widget wht
-            make the bottom of the gui, mostly the large
-            message widget
-            layouts
-                a vbox for main layout
-        """
-        # ---- new row
-        row_layout      = QHBoxLayout(   )
-        layout.addLayout( row_layout, )
-
-        # widget          = QPushButton( "Top" )
-        # widget.clicked.connect( self.top )
-        # row_layout.addWidget( widget )
-
-        # widget          = QPushButton( "Bottom" )
-        # widget.clicked.connect( self.bot )
-        # row_layout.addWidget( widget )
-
-        # ---- new row
-        row_layout      = QHBoxLayout(   )
-        layout.addLayout( row_layout, )
-
-        # ----
-        widget          = QTextEdit( "load\nthis should be new row " )
-        self.msg_widget = widget
-        #widget.clicked.connect( self.load    )
-        row_layout.addWidget( widget, )
-        self.output_edit    = widget
-
     # -------------------------------------
     def save_file( self, file_name ):
         """
@@ -252,6 +146,45 @@ class NoteTab( QWidget ):
 
         with open(  file_name, 'w' ) as a_file:
             a_file.write( the_text )
+
+
+    # -------------------------------------
+    def use_camera( self,   ):
+        """
+
+        """
+        controller      = AppGlobal.controller
+        tab_widget      = controller.tab_widget
+        widget          = controller.camera_tab
+
+        try:
+            index           = tab_widget.indexOf( widget )
+
+        except:
+            pass
+            return
+
+        tab_widget.removeTab( index )
+        widget.deleteLater()
+
+    # -------------------------------------
+    def explore_camera( self,   ):
+        """
+
+        """
+        controller      = AppGlobal.controller
+        tab_widget      = controller.tab_widget
+        widget          = controller.camera_tab
+
+        try:
+            index           = tab_widget.indexOf( widget )
+
+        except:
+            pass
+            return
+
+        tab_widget.removeTab( index )
+        widget.deleteLater()
 
 
     # ---- next probably old junk  ----------------------------------------------------

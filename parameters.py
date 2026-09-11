@@ -14,6 +14,8 @@ if __name__ == "__main__":
 
 import logging
 import sys
+import string_utils
+
 
 # ---- local imports
 
@@ -22,6 +24,117 @@ import sys
 global PARAMETERS
 
 PARAMETERS   = None
+
+
+
+
+
+# ========================================
+class ScopeSetups( ):
+    """
+    a collection of scope setups for this run of the program
+
+    """
+    # -------
+    def __init__( self, ):
+        """
+
+        """
+        # it is really the name we want unique
+        self.camera_setups      = set( )
+
+    # -------
+    def add_setup( self, camera_setup, ):
+        """
+
+        """
+        camera_setups   = self.camera_setups
+        no_setups       = len( camera_setups )
+        camera_setups.add( camera_setup )
+
+    # -------
+    def get_setup_dict( self,   ):
+        """
+        consider a sort
+        """
+        setup_dict      = {}  # dict comp ??
+        camera_setups   = self.camera_setups
+
+        for ix, i_setup in enumerate( camera_setups ):
+            setup_dict[ i_setup.setup_id ]  = i_setup
+
+        return setup_dict
+
+# ========================================
+class ScopeSetup( ):
+    """
+    gives an id to c  the scope and its usb sensor
+    and then a list of configs for this setup
+
+    a_setup = SetupConfig( setup_id      = "Setup id",
+                               scope_name       = "Watson",
+                               camera_name      = "users name for camera",
+                               camera_usb_name  = "USB CAMERA...."
+                               usb_format       = "1920x1080  Jpeg  30 fps"
+                               scope_mag        = "objective",
+                                   # or the objective
+                               reticle_file     = "base reticle name",
+                               reticle_scale    =  1.2 )
+
+    ------------------------
+
+    """
+
+    def __init__( self, *,
+                 setup_id,
+                 scope_name,
+                 camera_name,
+                 camera_usb_name,
+                 usb_format,
+                 scope_mag,
+                 reticle_file,
+                 reticle_scale   ):
+        """
+        usual init
+        """
+        self.setup_id           = setup_id
+        self.scope_name         = scope_name
+        self.camera_name        = camera_name
+        self.camera_usb_name    = camera_usb_name
+        self.usb_format         = usb_format
+        self.scope_mag          = scope_mag
+
+       # self.interface_id       = interface_id
+        self.reticle_file       = reticle_file
+        self.reticle_scale      = reticle_scale
+
+        # reticle_config_set = set()
+
+        # if reticle_config
+        #    reticle_config_set.add( reticle_config )
+
+    #--------------------------
+    def __str__( self ):
+        """
+        universal __str__
+        """
+        return string_utils.obj_to_str( self )
+
+
+# ========================================
+class CameraConfigxxx( ):
+    """
+    for a scope setup
+    gives the camera interface, the scope mag and a list of reticules
+    """
+
+# ========================================
+class ReticleConfigxxx( ):
+    """
+    for a ReticleConfig reticle Config
+    gives the   reticle file name and the scale to be used
+    """
+
 
 # ========================================
 class Parameters( ):
@@ -38,10 +151,11 @@ class Parameters( ):
         """
         self.new_user_mode()
         self.mode_dev_debug()
+        #self.mode_millhouse()
 
 
         # --- add on for testing, use as desired edit mode for your needs
-        #self.plus_test_mode()
+        #self.plus_test_mode()mode_dev_debug
 
     # ---- ---->> Methods: one for each mode
     # -------
@@ -56,8 +170,44 @@ class Parameters( ):
     def mode_dev_debug( self ):
         """
         for dev and debug, mostly for rsh
+        now for kingholmer
         """
         self.mode               = "mode_dev_debug"
+
+         # # ---- output
+         # self.output_dir         = "./output"   #
+         # self.photo_dir          = "./output"   #
+         # self.reticle_dir        = "./misc"   #
+         # self.reticle_dict        =  { "4x":   "4x_reticle.png",
+         #                               "10x":  "10x_reticle.png"
+         #                             }
+
+        # good for kingholmer
+        self.qt_width           = 1500
+        self.qt_height          = 100    # 700 most of win height
+        self.qt_xpos            = 10
+        self.qt_ypos            = 10
+
+         # # ---- output
+         # self.output_dir         = "./output"   #
+         # self.photo_dir          = "./output"   #
+         # self.reticle_dir        = "./misc"   #
+         # self.reticle_dict        =  { "4x":   "4x_reticle.png",
+         #                               "10x":  "10x_reticle.png"
+         #                             }
+
+        # ---- output
+        self.output_dir         = "/home/russ/global_sync/photo_temp"
+        self.output_dir         = "./temp_photo"
+
+        self.photo_dir          = self.output_dir
+
+    # -------
+    def mode_millhouse( self ):
+        """
+        for dev and debug, mostly for rsh
+        """
+        self.mode               = "mode_millhouse"
 
          # # ---- output
          # self.output_dir         = "./output"   #
@@ -72,6 +222,10 @@ class Parameters( ):
         self.qt_height          = 600    # 700 most of win height
         self.qt_xpos            = 10
         self.qt_ypos            = 10
+
+        # ---- output
+        self.output_dir         = "/home/russ/sync_with_bulldog/global_sync/photo_temp"   #
+        self.photo_dir          = self.output_dir
 
     # -------
     def running_on_tweaks(self,  ):
@@ -198,13 +352,6 @@ class Parameters( ):
         self.qt_xpos            = 10
         self.qt_ypos            = 10
 
-        # self.wat_qt_width       = 1000
-        # self.wat_qt_height      = 400
-        # self.wat_qt_xpos        = 10
-        # self.wat_qt_ypos        = 10
-
-
-        # self.minimun_useful    =  10
         # ---- .... icon
         self.icon               = r"./images/icon_red.png"    # icon for running app
         self.icon               = r"./icons/icons/binocular.png"
@@ -213,7 +360,83 @@ class Parameters( ):
         self.text_editor        = "gedit"
         self.text_editor        = "xed"
 
-        # ---- overlay  defaults
+        # ---- debug
+        self.debug_flag         = True
+
+        # ---- scope setups...............
+        scope_setups           = ScopeSetups( )
+
+        # ----  a_setup
+        a_setup = ScopeSetup(
+                               setup_id         = "Setup USB CAMERA: 1920x1080",
+                                   # you make up a name for these values
+
+                               # next are your names to help you keep track
+                               scope_name       = "Watson 1",
+                               scope_mag        = "4x ",
+                               camera_name      = "sv eyepeice 1",
+
+                               # next must match the parameters the usb interface emits
+                               camera_usb_name  = "USB CAMERA: USB CAMERA",
+                               usb_format       = "1920x1080  Jpeg  30 fps",
+
+                               # these are up to you
+                               reticle_file     = "10_cricles.png",
+                                   # must be a file in ./reticles
+                               reticle_scale    =  2.0     )
+
+        scope_setups.add_setup( a_setup )
+
+        # ----  a_setup
+        a_setup = ScopeSetup(
+                               setup_id         = "Setup USB CAMERA: 1280x720 ",
+
+                               scope_name       = "Watson 300",
+                               scope_mag        = "10x",
+                               camera_name      = "sv eyepeice 300",
+
+                               camera_usb_name  = "USB CAMERA: USB CAMERA",  #USB CAMERA: USB CAMERA
+                               usb_format       = '1280x720  Jpeg  30 fps',
+                               reticle_file     = "10x_reticle.png",
+                               reticle_scale    =   .5    )
+
+        scope_setups.add_setup( a_setup )
+        # setup end
+        # ----  a_setup with prefix >from write_reticle<
+        a_setup = ScopeSetup(
+                               setup_id         = "from wite_setup",
+
+                               scope_name       = "weston",
+                               scope_mag        = "1/10",
+                               camera_name      = "built in ",
+
+                               camera_usb_name  = "USB CAMERA: USB CAMERA",
+                               usb_format       = "1920x1080  Jpeg  30 fps",
+                               reticle_file     = "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/m_scope/reticles/10x_reticle.png",
+                               reticle_scale    =  1.0 )
+
+        scope_setups.add_setup( a_setup )
+        # setup end
+
+        # ---- cameras setup end
+        self.scope_setups       = scope_setups
+
+        #setup_dict[ a_setup.setup_id ]   =  a_setup
+
+        # self.valid_cameras     = {}
+        # self.valid_cameras[ "Camera 1 High Rez": ( "" , "" )]
+
+
+        # setup_dict     = {"AO Lab scope": ( "AO similar to 1036A " "SvBony Telescope EyePeice  SV105 or SV106" )}
+        #      # id then explain 2 parts
+        #      # need to link to configs
+        # config_dict     =   {"AO Standard Config": ( "interface id" "scope mag" "list of recicules" )}
+        #                                             # CAMERA
+
+        # reticle_dict    =   { "reticule_id": "filename" {scale}}
+
+
+        # ---- reticle  overlay  defaults
 
         self.overlay_opacity    = 30
 
@@ -225,47 +448,25 @@ class Parameters( ):
         # ---- output
         self.output_dir         = "./output"   #
         self.photo_dir          = "./output"   #
-        self.reticle_dir        = "./misc"   #
-        self.reticle_dict        =  { "4x":   "4x_reticle.png",
-                                      "10x":  "10x_reticle.png"
-                                    }
+        #self.reticle_dir        = "./misc"   #
+        self.reticle_dir        = "./reticles"       # !! in process
 
         # next now auto from reticle_dict, chang back ??
         self.default_ovelay     = "./misc/red_black_cross_2.jpg"  # file_name
 
-
         # ---- logging
-        self.pylogging_fn       = f"{self.output_dir}/app.py_log"   # file name for the python logging
+        self.pylogging_fn           = f"{self.output_dir}/app.py_log"   # file name for the python logging
 
         self.log_mode               = "w"    # "a" append "w" truncate and write
 
-        self.logging_level      = logging.DEBUG         # may be very verbose
-        self.logging_level      = logging.INFO
+        self.logging_level          = logging.DEBUG         # may be very verbose
+        #self.logging_level          = logging.INFO
         #self.logging_level      = logging.INFO
 
-        self.logger_id          = "qt_ex"         # id of app in logging file
+        self.logger_id              = "m_scope"         # id of app in logging file
 
-        self.default_fn_functon   = None
+        self.default_fn_functon     = None
 
-
-        # self.breakpoint_ok      = True  # enable breakpoin button
-
-        # self.auto_run           = True
-
-        # # ---- database there are 2
-        # self.db_type            = "QSQLITE"
-        #     # the type of database, so far we only support sqllite
-
-        # # ---- .... for sample database
-        # self.db_file_name        = "/tmp/ramdisk/qt_sql.db"
-        # self.db_file_name        = ":memory:"     #  = "sample.db"   =  ":memory:"
-        # #self.db_file_name        = "./qt_sql.db"    #  real files are very slow
-
-        # # ---- .... for qt tabs
-        # self.tab_db_type         = "QSQLITE"
-        # self.tab_db_file_name    = "/tmp/ramdisk/tab.db"
-        # self.tab_db_file_name    = "./tab.db"
-        # self.tab_db_file_name    = ":memory:"
 
         # ---- file names -- but not db
         # control button for editing the readme file
@@ -357,20 +558,20 @@ class Parameters( ):
         a_str   = self.to_columns( a_str, ["mode",
                                            f"{self.mode}" ] )
 
+
+        a_str   = self.to_columns( a_str, ["output_dir",
+                                           f"{self.output_dir}" ] )
+
+
+        a_str   = self.to_columns( a_str, ["photo_dir",
+                                           f"{self.photo_dir}" ] )
+
+
+
         a_str   = self.to_columns( a_str, ["our_os",
                                            f"{self.our_os}" ] )
 
-        a_str   = self.to_columns( a_str, ["db_type",
-                                           f"{self.db_type}" ] )
 
-        a_str   = self.to_columns( a_str, ["db_file_name",
-                                           f"{self.db_file_name}" ] )
-
-
-        a_str   = self.to_columns( a_str, ["tab_db_type",
-                                           f"{self.tab_db_type}" ] )
-        a_str   = self.to_columns( a_str, [ "tab_db_file_name",
-                                            f"{self.tab_db_file_name}" ] )
 
         a_str   = self.to_columns( a_str, ["help_fn",
                                            f"{self.help_fn}" ] )
@@ -391,11 +592,7 @@ class Parameters( ):
         a_str   = self.to_columns( a_str, [ "log_mode",
                                                   f"{self.log_mode}" ] )
 
-        a_str   = self.to_columns( a_str, ["minimun_useful",
-                                           f"{self.minimun_useful}" ] )
 
-        a_str   = self.to_columns( a_str, ["breakpoint_ok",
-                                           f"{self.breakpoint_ok}" ] )
 
         a_str   = self.to_columns( a_str, ["pylogging_fn",
                                            f"{self.pylogging_fn}" ] )
@@ -412,16 +609,7 @@ class Parameters( ):
                                            f"{self.readme_fn}" ] )
         a_str   = self.to_columns( a_str, ["text_editor",
                                            f"{self.text_editor}" ] )
-        a_str   = self.to_columns( a_str, ["wat_qt_height",
-                                           f"{self.wat_qt_height}" ] )
-        a_str   = self.to_columns( a_str, ["wat_qt_width",
-                                           f"{self.wat_qt_width}" ] )
-        a_str   = self.to_columns( a_str, ["wat_qt_xpos",
-                                           f"{self.wat_qt_xpos}" ] )
-        a_str   = self.to_columns( a_str, ["wat_qt_ypos",
-                                           f"{self.wat_qt_ypos}" ] )
-        a_str   = self.to_columns( a_str, ["self.dir_for_tabs",
-                                           f"{self.dir_for_tabs}" ] )
+
 
         return a_str
 

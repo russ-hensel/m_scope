@@ -18,17 +18,20 @@ if __name__ == "__main__":
 import sys
 import os
 from   functools import partial
+from   pathlib   import Path
 
 from qtpy import QtGui
 
 
-from qtpy.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QVBoxLayout, QWidget
+from qtpy.QtWidgets import   QLineEdit,  QWidget
 
 from qtpy.QtWidgets import ( QComboBox,
                              QDoubleSpinBox,
                              QFileDialog,
                              QHBoxLayout,
                              QTabWidget,
+                             QGroupBox,
+                             QRadioButton,
                              QLabel,
                              QPushButton,
                              QSlider,
@@ -40,10 +43,10 @@ from qtpy.QtCore import ( Qt, QTimer )
 from qtpy.QtGui  import ( QPainter )
 
 # ---- imports local
-import  parameters
+
 import  image_overlay_view
 from    app_global import AppGlobal
-
+import  utils
 
 
 # ---- constants
@@ -67,9 +70,11 @@ IMAGE_FILTER    = ( "Images (*.png *.jpg *.jpeg *.bmp *.gif *.tif *.tiff *.webp)
 
 
 
-
 # ----------------------------
-class OverlayTab( QWidget  ):
+class OverlayTab( QWidget ):
+    """
+    This is the tab that contains the reticule and is used for measurement
+    """
     def __init__( self,  ):
         """
         the usual
@@ -87,6 +92,8 @@ class OverlayTab( QWidget  ):
 
         self.on_opacity_changed( AppGlobal.parameters.overlay_opacity )
 
+        # self.display_reticle_fn() not working
+
     #----------------------------
     def build_gui_widgets( self, main_layout ):
         """
@@ -98,10 +105,8 @@ class OverlayTab( QWidget  ):
         layout              = QVBoxLayout(   )
         main_layout.addLayout( layout )
 
-        # ---- load layout
         load_layout         = QHBoxLayout(   )
         layout.addLayout( load_layout )
-
 
         # ---- load photo
         a_widget            = QPushButton( "Load Photo..." )
@@ -113,23 +118,51 @@ class OverlayTab( QWidget  ):
         a_widget.clicked.connect( self.load_base_from_last_snap )
         load_layout.addWidget( a_widget )
 
+        # # ---- reticle set up buttons
+        # #self.reticle_disptach = {}
+        # for key, value in parameters.reticle_dict.items():
+        #     fn, scale           = value
+        #     a_widget            = QPushButton( key )
 
-        #self.reticle_disptach = {}
-        for key, value in parameters.reticle_dict.items():
-            a_widget            = QPushButton( key )
-            file_name           = (parameters.reticle_dir + "/" + value ).replace( "//", "/" )
-            foo                 = partial( self.load_overlay, file_name )
-            a_widget.clicked.connect( foo )
-            load_layout.addWidget( a_widget )
+        #     file_name           = ( parameters.reticle_dir + "/" + fn ).replace( "//", "/" )
+        #     foo                 = partial( self.load_overlay, file_name )
+        #     a_widget.clicked.connect( foo )
+        #     load_layout.addWidget( a_widget )
+
+        #self.build_rb_in_groupbox( load_layout )
 
 
-        a_widget            = QPushButton( "Load Reticle..." )
+
+        # scope_setups    = parameters.scope_setups.get_setup_dict()
+
+        # # ---- "Scope Setup:"
+        # a_widget            = QLabel( "Scope Setup:" )
+        # load_layout.addWidget( a_widget )
+
+        # a_widget            = QComboBox()
+        # for i_name in scope_setups.keys():
+        #     a_widget.addItem( i_name )
+        # # a_widget.currentIndexChanged.connect( self.on_blend_changed )
+        # self.scope_setup_widget    = a_widget
+        # load_layout.addWidget( a_widget )
+
+        # ---- "Reticle:"
+        a_widget            = QLabel( "Reticle:" )
+        load_layout.addWidget( a_widget )
+
+        a_widget            = QLabel(   )
+        self.reticle_widget    = a_widget
+        load_layout.addWidget( a_widget )
+
+        a_widget            = QPushButton( "Load Reticle File..." )
         a_widget.clicked.connect( self.on_load_overlay )
+        self.load_reticle_widget = a_widget
         load_layout.addWidget( a_widget )
 
-        a_widget            = QPushButton( "Load Test Images" )
-        a_widget.clicked.connect( self._load_demo_images )
-        load_layout.addWidget( a_widget )
+        if parameters.debug_flag:
+            a_widget            = QPushButton( "Load Test Images" )
+            a_widget.clicked.connect( self._load_demo_images )
+            load_layout.addWidget( a_widget )
 
         load_layout.addStretch( 1 )
 
@@ -137,7 +170,22 @@ class OverlayTab( QWidget  ):
         a_widget.clicked.connect( self.on_save_result )
         load_layout.addWidget( a_widget )
 
-        # ----  ImageOverlayView
+
+        # ---- row layout
+        row_layout         = QHBoxLayout(   )
+        layout.addLayout( row_layout )
+
+        a_widget            = QLabel( "base file name" )
+        self.base_fn_widget = a_widget
+        row_layout.addWidget( a_widget )
+
+        # ---- "base reticle name"
+        a_widget            = QLabel( "base reticle name" )
+        self.reticle_fn_widget = a_widget
+        row_layout.addWidget( a_widget )
+
+
+        # ----  ImageOverlayView --------------------------
         a_widget            = image_overlay_view.ImageOverlayView(   )
         a_widget.setMinimumHeight( 320 )
         a_widget.overlay_changed.connect( self.on_overlay_changed )
@@ -181,20 +229,22 @@ class OverlayTab( QWidget  ):
         pos_layout.addWidget( a_widget )
 
         # ---- Scale
-        a_widget            = QLabel( "Scale" )
+        a_widget            = QLabel( "Scale" ) # Reticle
         pos_layout.addWidget( a_widget )
 
         a_widget            = QDoubleSpinBox(   )
+        self.scale_widget   = a_widget
+        self.scale_spin     = a_widget    # phase out replace above
         a_widget.setRange( 0.05, 20.0 )
         a_widget.setSingleStep( 0.05 )
         a_widget.setDecimals( 3 )
         a_widget.setValue( 1.0 )
         a_widget.valueChanged.connect( self.on_scale_spin_changed )
-        self.scale_spin     = a_widget
         pos_layout.addWidget( a_widget )
 
         # ---- reset
         a_widget            = QPushButton( "Reset" )
+        self.reset_widget   = a_widget
         a_widget.clicked.connect( self.on_reset_overlay )
         pos_layout.addWidget( a_widget )
 
@@ -269,14 +319,17 @@ class OverlayTab( QWidget  ):
         button_layout       = QHBoxLayout(   )
         layout.addLayout( button_layout )
 
-    # ---- loading -----------------------------------------------------------
 
+
+    # ---- loading -----------------------------------------------------------
     # -------------------------------------
     def _load_demo_images( self, ):
         """
         read it -- images made in code, so the tab shows something the moment
         it opens with no files to hunt for.  the overlay has a hole punched in
         it, which is what you look through
+        !! still need to save file names in self.xxxxx but really none
+
         """
         base, overlay       = image_overlay_view.make_demo_pixmaps()
 
@@ -291,28 +344,63 @@ class OverlayTab( QWidget  ):
 
     # -------------------------------------
     def on_load_base( self, ):
-        """ what it says """
-        file_name, _        = QFileDialog.getOpenFileName( self, "Base image ( the bottom one )",
-                                                           self.last_dir, IMAGE_FILTER )
+        """
+        what it says
+
+        """
+        parameters          = AppGlobal.parameters
+        a_dir               = parameters.photo_dir
+
+        controller          = AppGlobal.controller
+        note_tab            = controller.note_tab
+
+
+        file_name, _        = QFileDialog.getOpenFileName( self, "Specimen image ( the bottom one )",
+                                                            a_dir, IMAGE_FILTER )
         if not file_name:
             return
 
-        self.last_dir       = os.path.dirname( file_name )
+        self                = self.load_specimen_file( file_name, )
 
-        if self.overlay_view.set_base_image( file_name ):
-            self.overlay_view.fit_to_view()
-            print( f"base image: {file_name}" )
-        else:
-            print( f"could not load {file_name}" )
+        pass
+
+        # !! SOME USEFUL STUFF HERE DO NOT DELETE YET ADD TO OTHER FUNCTION
+        # # get note file name
+        # our_path            = Path( file_name )
+        # file_name_note      = f"{our_path.parent}/{our_path.stem}.txt"
+
+        # #self.last_dir       = os.path.dirname( file_name )
+
+        # if self.overlay_view.set_base_image( file_name ):
+        #     self.overlay_view.fit_to_view()
+        #     print( f"base image: {file_name}" )
+
+        # else:
+        #     print( f"could not load {file_name}" )
+        #     return
+
+        # self.base_fn_widget.setText( self.overlay_view.last_overlay_source  )
+
+        # item_code       = utils.get_item_code( file_name )
+        # controller.set_item_code( item_code )
+
+        # # get the note
+        # note_list       = utils.read_file_to_list( file_name_note )
+        # note            = "".join( note_list )
+
+        # text_edit       = controller.note_tab.message_area.text_edit
+
+        # text_edit.append( note )
 
     # -------------------------------------
     def load_base_from_last_snap( self, file_name = None ):
         """ what it says
 
         file_name sometims late to camera tab, pass it but pass with care
+        create a load_base method
         """
         if not file_name:
-            camera_tab      = AppGlobal.controller.camera_tab
+            camera_tab      = AppGlobal.controller.get_camera_tab()
             file_name       = camera_tab.get_last_snap_fn()
 
         if not file_name:  # sort of left over should not happen
@@ -320,56 +408,147 @@ class OverlayTab( QWidget  ):
 
         if self.overlay_view.set_base_image( file_name ):
             self.overlay_view.fit_to_view()
+
             print( f"base image: {file_name}" )
 
         else:
             print( f"could not load {file_name}" )
 
+        self.display_base_fn()
+
+    # -------------------------------------
+    def load_specimen_file( self, file_name, ):
+        """
+        load the image for the specimen and
+            switch to the associated setup if it exists
+            also want to get date and item code
+
+        return code or msg in exception ??
+        """
+        controller  = AppGlobal.controller
+
+        if self.overlay_view.set_base_image( file_name ):
+            self.overlay_view.fit_to_view()
+            print( f"load_specimen_file specimen image: {file_name}" )
+
+        else:
+            print( f"load_specimen_file could not load {file_name}" )
+
+        self.display_base_fn()
+
+        # if not and_setup:
+        #     return
+
+        # ---- item code
+        item_code       = utils.get_item_code( file_name )
+        controller.set_item_code( item_code )
+
+        # ---- date code
+        qdate           = utils.get_date_code_as_date( file_name )
+
+        if qdate:
+            controller.date_code_widget.setDate( qdate )
+
+        # ---- setup
+        setup_fn    = str( utils.extract_related_fn( file_name, ".txt" ) )
+        setup       = utils.get_setup_from_file( setup_fn )
+
+        if setup:
+            pass
+            if not controller.setup_id_widget.set_current_key( setup ):
+                msg    = f"load_specimen_file() setup >{setup}< not found in combo box"
+                print( msg )
+
+                a_dict  = controller.setup_id_widget.get_dict()
+                for i_key, i_value in a_dict.items():
+                    print( i_key, i_value )
+
+        else:
+            msg    = "load_specimen_file()  extract of setup failed"
+            print( msg )
+
+        return
+
+    # -------------------------------------
+    def on_load_with_scale( self, fn, scale = None ):
+        """
+        reticle would be used by a setup
+        !! not sure we shoukd keep
+        """
+        self.load_overlay( fn )
+
+        if scale:
+            self.set_scale( scale )
+
     # -------------------------------------
     def on_load_overlay( self, ):
         """
+        this loads the reticle = overlay file with user interaction
         what it says -- and a word in the msg box if the image has no alpha,
         since "nothing shows through" is otherwise a puzzling result
         """
+        parameters          = AppGlobal.parameters
+        a_dir               = parameters.reticle_dir
+
+
+
         file_name, _        = QFileDialog.getOpenFileName( self, "Overlay image ( the top one )",
-                                                           self.last_dir, IMAGE_FILTER )
+                                                           a_dir,
+                                                           IMAGE_FILTER )
+
         if not file_name:
             return
 
-        self.load_overlay( file_name )
-
         self.last_dir       = os.path.dirname( file_name )
 
-        if not self.overlay_view.set_overlay_image( file_name ):
-            print( f"could not load {file_name}" )
-            return
-
-        print( f"overlay image: {file_name}" )
-
-        a_pixmap            = self.overlay_view.overlay_item.pixmap()
-        if not a_pixmap.hasAlphaChannel():
-            msg                 = ( "note: that image has no alpha channel, so nothing will show "
-                                    "through it -- use the opacity slider or a blend mode instead" )
-            print( msg )
-
+        self.load_overlay( file_name )  #
 
     # -------------------------------------
-    def load_overlay( self, file_name ):
+    def load_overlay( self, file_name, ):
         """
+        this is the reticle file not the object file
         what it says -- and a word in the msg box if the image has no alpha,
         since "nothing shows through" is otherwise a puzzling result
+
+            !! need a retun code -- it is the msg  "" is ok
+
+            with_txt = True
+                then try to load the assocaited .txt file and set to its
+                setup, perhaps a messeage if setup fails or not foung
+
         """
         if not self.overlay_view.set_overlay_image( file_name ):
-            print( f"could not load {file_name}" )
-            return
+            msg      = ( f"load_overlay() could not load {file_name}" )
+            print( msg )
+            return msg
 
-        print( f"overlay image: {file_name}" )
+        print( f"load_overlay: overlay image: {file_name}" )
 
         a_pixmap            = self.overlay_view.overlay_item.pixmap()
         if not a_pixmap.hasAlphaChannel():
             msg                 = ( "note: that image has no alpha channel, so nothing will show "
                                     "through it -- use the opacity slider or a blend mode instead" )
             print( msg )
+
+        self.reticle_file_name  = file_name
+        self.display_reticle_fn()
+
+        # may need to resolve this
+        parameters      = AppGlobal.parameters
+
+        # ---- !! needs work
+        if file_name.startswith( parameters.reticle_dir ):
+            pass
+        else:
+            pass
+
+        name  = Path( file_name )
+        name  = name.name
+
+        self.reticle_widget.setText( name )
+
+        msg     = ""  # "" is ok and is falsey
+        return msg
 
     # -------------------------------------
     def on_save_result( self, ):
@@ -381,7 +560,8 @@ class OverlayTab( QWidget  ):
             print( "nothing to save -- load a base and an overlay first" )
             return
 
-        file_name, _        = QFileDialog.getSaveFileName( self, "Save the composite",
+        file_name, _        = QFileDialog.getSaveFileName( self,
+                                                          "Save the composite",
                                                            os.path.join( self.last_dir, "overlay_result.png" ),
                                                            IMAGE_FILTER )
         if not file_name:
@@ -395,6 +575,7 @@ class OverlayTab( QWidget  ):
             a_image             = self.overlay_view.render_to_image()
             msg                 = ( f"saved {a_image.width()}x{a_image.height()} to {file_name}" )
             print( msg )
+
         else:
             print( f"save FAILED to {file_name}" )
 
@@ -416,11 +597,27 @@ class OverlayTab( QWidget  ):
             a_image         = self.overlay_view.render_to_image()
             msg             = ( f"saved {a_image.width()}x{a_image.height()} to {file_name}" )
             print( msg )
+
         else:
             print( f"save FAILED to {file_name}" )
 
 
     # ---- the controls ------------------------------------------------------
+    # -------------------------------------
+    def display_base_fn( self,  ):
+        """
+        read it
+        """
+        msg    = "Base File: {}"
+        self.base_fn_widget.setText( self.overlay_view.last_base_source  )
+
+    # -------------------------------------
+    def display_reticle_fn( self,  ):
+        """
+        read it
+        """
+        msg    = "Reticle File: {}"
+        self.reticle_fn_widget.setText( self.overlay_view.last_overlay_source  )
 
     # -------------------------------------
     def on_overlay_changed( self, x, y, rotation, scale ):
@@ -489,9 +686,35 @@ class OverlayTab( QWidget  ):
 
     # -------------------------------------
     def on_reset_overlay( self, ):
-        """ what it says -- corner on corner, no rotation, no scale """
+        """
+        what it says -- corner on corner, no rotation, no scale
+        """
         self.overlay_view.reset_overlay()
         print( "overlay reset" )
+
+    # -------------------------------------
+    def get_status_dict( self, ):
+        """
+        what it says -- corner on corner, no rotation, no scale
+        """
+        status_dict         = {}
+
+        key                 = "camera_name"
+
+
+        key                 = "reticle_scale"
+        value               = self.scale_spin.value()
+        status_dict[ key ]  = value
+
+        # key                 = "image_file_name"
+        # value               =
+        # status_dict[ key ]  = self.reticle_file_name
+
+        # key                 = "reticlefile_name"
+        # value               =
+        # status_dict[ key ]  = self.reticle_file_name
+
+
 
     # -------------------------------------
     def on_fit( self, ):

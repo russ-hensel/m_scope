@@ -6,12 +6,14 @@ uv self update
 
 #mkdir  ~/python_uv_venv
 cd       ~/python_uv_venv
+
 # recursive and non-empty
 rm -r   py3_13_qt6
 
 
 
 uv       venv py3_13_qt6   --python 3.13
+uv       venv py_13_spyder 
 
 source py3_13_qt6/bin/activate
 
@@ -33,3 +35,7 @@ uv pip install PyQt6-WebEngine
 
 
 uv pip install PyQt6-Charts
+
+
+
+

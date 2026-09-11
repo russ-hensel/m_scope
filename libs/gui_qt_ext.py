@@ -608,6 +608,13 @@ class MessageArea( QGroupBox ):
          get all text programatically
          make ctrl-c -v work
 
+    to just operate on the underling QTextEdit use
+        text_edit    = widget.text_edit
+            or perhaps
+        text_edit    = self.note_tab.message_area.text_edit
+
+
+
     add arguments to init
     make buttons optional !!
     make disable always on !!
@@ -655,7 +662,7 @@ class MessageArea( QGroupBox ):
         group_placer.place( copy_button, rowspan = 1, columnspan = 1 )
 
         # Create QTextEdit widget
-        text_edit = QTextEdit()
+        text_edit       = QTextEdit()
         # layout.addWidget(text_edit, 4, 0, 1, 3)  # Row 4, Column 0, RowSpan 1, ColumnSpan 3
         self.text_edit  = text_edit
         group_placer.place( text_edit, rowspan = 8, columnspan = 3 )
@@ -755,9 +762,9 @@ class MessageArea( QGroupBox ):
 #             AppGlobal.gui.root.update()
 #             print( "!! self.root not valid here ")
 
-    #  --------
-    def print_message(self, text):
-        print("Button clicked:", text)
+    # #  --------
+    # def print_message( self, text ):
+    #     print("Button clicked:", text)
 
     #--------
     def clear_text( self ):
@@ -774,12 +781,24 @@ class MessageArea( QGroupBox ):
 
         self.auto_scroll = state
 
+    # #-------------
+    # def get_all_plain_text( self, ):
+    #     """
+    #     returns
+    #         text in the text_edit
+    #         think all the t4ext
+    #     """
+    #     text_edit     = self.text_edit
+    #     selected_text = text_edit.toPlainText()
+    #     return selected_text
+    #     #print(  f" copy_text -> {selected_text }" )
+
     #-------------
     def get_plain_text( self, ):
         """
         returns
             text in the text_edit
-            think all the t4ext
+            think all the t4ext -- but looks like selected is this a bad name
         """
         text_edit     = self.text_edit
         selected_text = text_edit.toPlainText()
@@ -800,11 +819,17 @@ class MessageArea( QGroupBox ):
 
     #-------------------
     def delete_text( self,  ):
+        """ """
+
         self.text_edit.clear()
 
     #------------------------------
     def append_text( self, text, add_nl = True ):
-        """may include new line """
+        """
+        may include new line
+        there is also just an append method, this seems a bit overdone
+        auto scroll might be nice
+        """
         text_edit   = self.text_edit
         # self.text_edit.append( text )  adds nl at end
         text_edit.moveCursor( QTextCursor.MoveOperation.End )

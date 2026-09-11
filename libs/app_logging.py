@@ -18,18 +18,18 @@ depends on parmetes being set up first
 
 """
 
+# ---- tof
 import logging
 import sys
 import traceback
 
 
-
-from qt_compat import QApplication, QAction, exec_app, qt_version
-from PyQt.QtWidgets import QMainWindow, QToolBar, QMessageBox
+#from qt_compat import QApplication, QAction, exec_app, qt_version
+from qtpy.QtWidgets import QMainWindow, QToolBar, QMessageBox
 
 #from PyQt.QtGui import ( QAction, QActionGroup, )
 
-from PyQt.QtWidgets import (
+from qtpy.QtWidgets import (
                              QApplication,
                              QButtonGroup,
                              QCheckBox,
@@ -146,13 +146,14 @@ class DialogAddToLog( QDialog ):
 
         self.setLayout(layout)
 
-
+    #------------------------------
     def on_ok(self):
         # Store the input data in the mutable object
         self.data["return_value"] = self.combo_box.currentText() #      .text()
 
         self.accept()  # Close the dialog and return QDialog.Accepted
 
+    #------------------------------
     def on_cancel(self):
         self.reject()
 

@@ -47,17 +47,17 @@ from collections import defaultdict
 
 # ---- Qt
 
-from qt_compat import QApplication, QAction, exec_app, qt_version
-from PyQt.QtWidgets import QMainWindow, QToolBar, QMessageBox
+#from qt_compat import QApplication, QAction, exec_app, qt_version
+from qtpy.QtWidgets import QMainWindow, QToolBar, QMessageBox
 
-from PyQt import QtCore
-from PyQt.QtGui import QIntValidator, QStandardItem, QStandardItemModel, QTextCursor
-from PyQt.QtCore import QDate, QModelIndex, Qt, QTimer, pyqtSlot
-from PyQt.QtGui import  QTextDocument
+from qtpy import QtCore
+from qtpy.QtGui import QIntValidator, QStandardItem, QStandardItemModel, QTextCursor
+from qtpy.QtCore import QDate, QModelIndex, Qt, QTimer, Slot
+from qtpy.QtGui import  QTextDocument
 
-#from PyQt.QtGui import ( QAction, QActionGroup, )
+#from qtpy.QtGui import ( QAction, QActionGroup, )
 
-from PyQt.QtWidgets import (
+from qtpy.QtWidgets import (
                              QApplication,
                              QButtonGroup,
                              QCheckBox,

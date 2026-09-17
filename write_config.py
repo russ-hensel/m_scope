@@ -19,39 +19,22 @@ if __name__ == "__main__":
 
 # ---- imports
 
-from   functools import partial
-from   pathlib   import Path
-
-from qtpy import QtGui
 
 
-from qtpy.QtWidgets import ( QComboBox,
-                             QDoubleSpinBox,
-                             QFileDialog,
-                             QLineEdit,
-                             QWidget,
+
+from qtpy.QtWidgets import ( QLineEdit,
                              QApplication,
                              QHBoxLayout,
                              QDialog,
                              QTextEdit,
                              QVBoxLayout,
-                             QTabWidget,
-                             QGroupBox,
-                             QRadioButton,
-                             QLabel,
                              QPushButton,
-                             QSlider,
-                             QSpinBox,
                              QVBoxLayout,
                              )
 
-from qtpy.QtCore import ( Qt, QTimer )
-from qtpy.QtGui  import ( QPainter )
 
 # ---- imports local
 
-import  image_overlay_view
-from    app_global import AppGlobal
 
 
 
@@ -63,7 +46,7 @@ RESULT_SKIP     = 2
 # ----------------------------
 class ConfigWriter( QDialog ):
     """
-    write out te config
+    write out the config
     """
     def __init__( self, parent, controller ):
         """
@@ -211,8 +194,3 @@ class ConfigWriter( QDialog ):
         return msg
 
 # ---- eof
-
-
-
-
-

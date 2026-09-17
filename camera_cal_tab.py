@@ -15,39 +15,30 @@ if __name__ == "__main__":
 
 
 # ---- imports
-import sys
 import os
-from   pathlib import Path
 import logging
 
-from qtpy import QtGui
 
 
 
 from qtpy.QtWidgets import ( QComboBox,
-                             QDoubleSpinBox,
-                             QApplication, QMainWindow,   QLineEdit,   QWidget,
+                             QWidget,
                              QFileDialog,
                              QFrame,
                              QHBoxLayout,
-                             QTabWidget,
                              QLabel,
                              QPushButton,
-                             QSlider,
-                             QSpinBox,
                              QVBoxLayout,
                              )
 
-from qtpy.QtCore import ( Qt, QTimer )
-from qtpy.QtGui  import ( QPainter, QPixmap )
+from qtpy.QtCore import ( Qt )
+from qtpy.QtGui  import ( QPixmap )
 
 
 from    camera_capture_widget import CameraCaptureWidget
 import  parameters
-import  image_overlay_view
 from    app_global import AppGlobal
 # import  dict_list_model
-import  cq_combo_box_dict as cb_dict
 
 # ---- constants
 
@@ -82,7 +73,7 @@ class CameraCalTab( QWidget ):
 
         # ---- status line
         # ---- "Snap Photo"
-        a_widget            = QPushButton( "Snap Photo" )
+        a_widget            = QPushButton( "Snap Cal. Photo" )
         a_widget.clicked.connect( self.on_snap_still )
         self.snap_button    = a_widget
         layout.addWidget( a_widget )
@@ -361,6 +352,48 @@ class CameraCalTab( QWidget ):
         what it says
             call to do the snap
         """
+        controller    = AppGlobal.controller
+        controller.on_snap_still_cal( )
+
+
+    # -------------------------------------
+    def save_snap( self, fn_no_ext ):
+        """
+        what it says
+            from controller
+            a lot like on_snap_still_old
+
+        """
+        camera_widget  = self.camera_widget
+
+        if camera_widget.camera is None:
+            self._say( "no camera running -- click Start" )
+            1/0
+            return
+
+        if not camera_widget.image_capture.isReadyForCapture():
+            msg     = ( "camera not ready for capture yet -- try again in a moment" )
+            print( msg )
+            return
+
+        parameters   = AppGlobal.parameters
+        output_dir   = parameters.output_dir
+
+        controller   = AppGlobal.controller
+
+        file_name    = controller.get_file_name( fn_no_ext, ".jpg" )
+
+        # self._say( f"capture {capture_id} asked for: {file_name}" )  zz
+        camera_widget.snap_still( file_name )
+
+        # may continue in self.on_image_saved ??
+
+    # -------------------------------------
+    def on_snap_still_old( self, ):
+        """
+        what it says
+            call to do the snap
+        """
         camera_widget  = self.camera_widget
 
         if camera_widget.camera is None:
@@ -381,7 +414,6 @@ class CameraCalTab( QWidget ):
         try:
             fn_no_ext         = controller.get_fn_no_ext()
         except ValueError:
-            pass  #  message already issued
             return
 
         file_name    = controller.get_file_name( fn_no_ext, "_p.jpg" )
@@ -390,7 +422,6 @@ class CameraCalTab( QWidget ):
         # self._say( f"capture {capture_id} asked for: {file_name}" )  zz
         camera_widget.snap_still( file_name )
 
-        pass  # file is not done yet even though snap_still is done need delay of some sort or test
         # may continue in self.on_image_saved
 
     # -------------------------------------
@@ -548,7 +579,6 @@ class CameraCalTab( QWidget ):
         ?? add it to a gallery, or to the project's db, or show it in the
            image overlay tab as a base image ?
         """
-        pass
         print( "on_image_saved" )
         if AppGlobal.parameters.auto_load_snap:
             AppGlobal.controller.overlay_tab.load_base_from_last_snap(   )

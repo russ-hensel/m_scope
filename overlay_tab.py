@@ -15,23 +15,16 @@ if __name__ == "__main__":
 
 
 # ---- imports
-import sys
 import os
-from   functools import partial
 from   pathlib   import Path
 
-from qtpy import QtGui
 
-
-from qtpy.QtWidgets import   QLineEdit,  QWidget
+from qtpy.QtWidgets import   QWidget
 
 from qtpy.QtWidgets import ( QComboBox,
                              QDoubleSpinBox,
                              QFileDialog,
                              QHBoxLayout,
-                             QTabWidget,
-                             QGroupBox,
-                             QRadioButton,
                              QLabel,
                              QPushButton,
                              QSlider,
@@ -69,11 +62,10 @@ COMPOSITION_MODES = [ ( "Normal ( over )", QPainter.CompositionMode.CompositionM
 IMAGE_FILTER    = ( "Images (*.png *.jpg *.jpeg *.bmp *.gif *.tif *.tiff *.webp);;All files (*)" )
 
 
-
 # ----------------------------
 class OverlayTab( QWidget ):
     """
-    This is the tab that contains the reticule and is used for measurement
+    This is the tab that contains the reticle and is used for measurement
     """
     def __init__( self,  ):
         """
@@ -131,8 +123,6 @@ class OverlayTab( QWidget ):
 
         #self.build_rb_in_groupbox( load_layout )
 
-
-
         # scope_setups    = parameters.scope_setups.get_setup_dict()
 
         # # ---- "Scope Setup:"
@@ -166,10 +156,9 @@ class OverlayTab( QWidget ):
 
         load_layout.addStretch( 1 )
 
-        a_widget            = QPushButton( "Save..." )
-        a_widget.clicked.connect( self.on_save_result )
-        load_layout.addWidget( a_widget )
-
+        # a_widget            = QPushButton( "Save..." )
+        # a_widget.clicked.connect( self.on_save_result )
+        # load_layout.addWidget( a_widget )
 
         # ---- row layout
         row_layout         = QHBoxLayout(   )
@@ -354,50 +343,20 @@ class OverlayTab( QWidget ):
         controller          = AppGlobal.controller
         note_tab            = controller.note_tab
 
-
         file_name, _        = QFileDialog.getOpenFileName( self, "Specimen image ( the bottom one )",
                                                             a_dir, IMAGE_FILTER )
         if not file_name:
             return
 
-        self                = self.load_specimen_file( file_name, )
-
-        pass
-
-        # !! SOME USEFUL STUFF HERE DO NOT DELETE YET ADD TO OTHER FUNCTION
-        # # get note file name
-        # our_path            = Path( file_name )
-        # file_name_note      = f"{our_path.parent}/{our_path.stem}.txt"
-
-        # #self.last_dir       = os.path.dirname( file_name )
-
-        # if self.overlay_view.set_base_image( file_name ):
-        #     self.overlay_view.fit_to_view()
-        #     print( f"base image: {file_name}" )
-
-        # else:
-        #     print( f"could not load {file_name}" )
-        #     return
-
-        # self.base_fn_widget.setText( self.overlay_view.last_overlay_source  )
-
-        # item_code       = utils.get_item_code( file_name )
-        # controller.set_item_code( item_code )
-
-        # # get the note
-        # note_list       = utils.read_file_to_list( file_name_note )
-        # note            = "".join( note_list )
-
-        # text_edit       = controller.note_tab.message_area.text_edit
-
-        # text_edit.append( note )
+        self.load_specimen_file( file_name, )
 
     # -------------------------------------
     def load_base_from_last_snap( self, file_name = None ):
-        """ what it says
+        """
+        what it says
 
-        file_name sometims late to camera tab, pass it but pass with care
-        create a load_base method
+            file_name sometims late to camera tab, pass it but pass with care
+            create a load_base method
         """
         if not file_name:
             camera_tab      = AppGlobal.controller.get_camera_tab()
@@ -449,12 +408,11 @@ class OverlayTab( QWidget ):
         if qdate:
             controller.date_code_widget.setDate( qdate )
 
-        # ---- setup
+        # ---- setup or the notes
         setup_fn    = str( utils.extract_related_fn( file_name, ".txt" ) )
         setup       = utils.get_setup_from_file( setup_fn )
 
         if setup:
-            pass
             if not controller.setup_id_widget.set_current_key( setup ):
                 msg    = f"load_specimen_file() setup >{setup}< not found in combo box"
                 print( msg )
@@ -582,7 +540,7 @@ class OverlayTab( QWidget ):
     # -------------------------------------
     def save_file( self, file_name ):
         """
-
+        what it says
         """
         if not self.overlay_view.has_images():
             print( "nothing to save -- load a base and an overlay first" )
@@ -601,14 +559,13 @@ class OverlayTab( QWidget ):
         else:
             print( f"save FAILED to {file_name}" )
 
-
     # ---- the controls ------------------------------------------------------
     # -------------------------------------
     def display_base_fn( self,  ):
         """
         read it
         """
-        msg    = "Base File: {}"
+        #msg    = "Base File: {}"
         self.base_fn_widget.setText( self.overlay_view.last_base_source  )
 
     # -------------------------------------
@@ -616,7 +573,7 @@ class OverlayTab( QWidget ):
         """
         read it
         """
-        msg    = "Reticle File: {}"
+        #msg    = "Reticle File: {}"
         self.reticle_fn_widget.setText( self.overlay_view.last_overlay_source  )
 
     # -------------------------------------
@@ -639,6 +596,7 @@ class OverlayTab( QWidget ):
     def on_offset_spin_changed( self, value ):
         """
         what it says -- value is unused, both spin boxes are read together
+        X and Y
         """
         self.overlay_view.set_overlay_offset( self.x_spin.value(), self.y_spin.value() )
 

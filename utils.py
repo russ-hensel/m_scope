@@ -15,7 +15,6 @@ utils is lame, reorganize
 
 # ---- imports
 
-import sys
 import os
 from   pathlib import Path
 
@@ -25,6 +24,21 @@ from datetime       import datetime
 from qtpy.QtCore    import QDate
 
 # ---- imports local -- then constants
+
+# -------------------------------
+def next_file_ix(   ):
+    """
+    get next file ix and update on disk
+    """
+    file_name    = "./counter.txt"
+    with open( file_name, 'r' ) as a_file:
+        file_as_list = list( a_file )
+        ix            = int( file_as_list[ 0 ] )  + 1
+
+    with open( file_name, 'w' ) as a_file:    # wa will append so file should be deleted time to time w will overwrite
+        a_file.write( f"{ix}\n" )
+
+    return ix
 
 # -------------------------------
 def read_file_to_list( file_name ):
@@ -39,7 +53,6 @@ def read_file_to_list( file_name ):
             # print( f"{file_as_list}"  )
 
     except:
-
         msg_box_msg    = f"Could not open file {file_name}"
         msg_box        = QMessageBox()
         msg_box.setIcon( QMessageBox.Information )
@@ -192,8 +205,10 @@ def date_time_marker(  ):
 def time_marker(  ):
     """
     what it says -- sortable, no characters that annoy a file system
+    now changing to a counter, my rename later
     """
-    return datetime.now().strftime( "_%H%M%S" )  # or could truncate
+    #return datetime.now().strftime( "_%H%M%S" )  # or could truncate
+    return f"_{next_file_ix( )}"
 
 # -------------------------------
 def gen_fn_stem( prefix ):
@@ -232,11 +247,24 @@ def test2():
     value         = get_setup_from_file( file_name )
     print( value )
 
+
+# -------------------------------
+def test3():
+    """ may fail if not in qapplication
+    """
+
+    for i in range( 4 ):
+        ix              = next_file_ix()
+        print( ix )
+
+
+
 # for tests, move
 if __name__ == '__main__':
 
-    test1()
-    test2()
+    # test1()
+    # test2()
+    test3()
 
 # ---- eof ---------------------------
 

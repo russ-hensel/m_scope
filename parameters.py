@@ -26,9 +26,6 @@ global PARAMETERS
 PARAMETERS   = None
 
 
-
-
-
 # ========================================
 class ScopeSetups( ):
     """
@@ -49,7 +46,7 @@ class ScopeSetups( ):
 
         """
         camera_setups   = self.camera_setups
-        no_setups       = len( camera_setups )
+        #no_setups       = len( camera_setups )
         camera_setups.add( camera_setup )
 
     # -------
@@ -60,7 +57,7 @@ class ScopeSetups( ):
         setup_dict      = {}  # dict comp ??
         camera_setups   = self.camera_setups
 
-        for ix, i_setup in enumerate( camera_setups ):
+        for i_setup in camera_setups:
             setup_dict[ i_setup.setup_id ]  = i_setup
 
         return setup_dict
@@ -68,6 +65,7 @@ class ScopeSetups( ):
 # ========================================
 class ScopeSetup( ):
     """
+    this is just a struct, I like it as a class
     gives an id to c  the scope and its usb sensor
     and then a list of configs for this setup
 
@@ -120,22 +118,6 @@ class ScopeSetup( ):
         """
         return string_utils.obj_to_str( self )
 
-
-# ========================================
-class CameraConfigxxx( ):
-    """
-    for a scope setup
-    gives the camera interface, the scope mag and a list of reticules
-    """
-
-# ========================================
-class ReticleConfigxxx( ):
-    """
-    for a ReticleConfig reticle Config
-    gives the   reticle file name and the scale to be used
-    """
-
-
 # ========================================
 class Parameters( ):
     """
@@ -152,7 +134,6 @@ class Parameters( ):
         self.new_user_mode()
         self.mode_dev_debug()
         #self.mode_millhouse()
-
 
         # --- add on for testing, use as desired edit mode for your needs
         #self.plus_test_mode()mode_dev_debug
@@ -183,8 +164,8 @@ class Parameters( ):
          #                             }
 
         # good for kingholmer
-        self.qt_width           = 1500
-        self.qt_height          = 100    # 700 most of win height
+        self.qt_width           = 1400
+        self.qt_height          = 80    # 700 most of win height
         self.qt_xpos            = 10
         self.qt_ypos            = 10
 
@@ -199,6 +180,7 @@ class Parameters( ):
         # ---- output
         self.output_dir         = "/home/russ/global_sync/photo_temp"
         self.output_dir         = "./temp_photo"
+        self.output_dir         = "./photos"
 
         self.photo_dir          = self.output_dir
 
@@ -355,7 +337,8 @@ class Parameters( ):
         # ---- .... icon
         self.icon               = r"./images/icon_red.png"    # icon for running app
         self.icon               = r"./icons/icons/binocular.png"
-        self.icon               = r"./misc/computer.ico"
+        self.scope_icon               = r"./misc/puzzle_16x16.png"
+        self.view_icon               = r"./misc/binocular.png"
 
         self.text_editor        = "gedit"
         self.text_editor        = "xed"
@@ -365,6 +348,43 @@ class Parameters( ):
 
         # ---- scope setups...............
         scope_setups           = ScopeSetups( )
+
+
+
+        # ----  a_setup with prefix >from write_reticle<
+        a_setup = ScopeSetup(
+                               setup_id         = "russ on millhouse 4x",
+
+                               scope_name       = "AO Russ",
+                               scope_mag        = "4x",
+                               camera_name      = "sv eyepeice",
+
+                               camera_usb_name  = "SVBONY SV105C: SVBONY SV105C",
+                               usb_format       = "1920x1080  Jpeg  30 fps",
+                               reticle_file     = "/home/russ/sync_with_bulldog/_projects/m_scope/reticles/10x_reticle.png",
+                               reticle_scale    =  2.15 )
+
+        scope_setups.add_setup( a_setup )
+        # setup end
+
+        # ----  a_setup with prefix >from write_reticle<
+        a_setup = ScopeSetup(
+                               setup_id         = "russ on millhouse 10x",
+
+                               scope_name       = "AO Russ",
+                               scope_mag        = "10x",
+                               camera_name      = "sv eyepeice",
+
+                               camera_usb_name  = "SVBONY SV105C: SVBONY SV105C",
+                               usb_format       = "1920x1080  Jpeg  30 fps",
+                               reticle_file     = "/home/russ/sync_with_bulldog/_projects/m_scope/reticles/10x_reticle.png",
+                               reticle_scale    =  6.3 )
+
+        scope_setups.add_setup( a_setup )
+        # setup end
+
+
+
 
         # ----  a_setup
         a_setup = ScopeSetup(
@@ -417,6 +437,25 @@ class Parameters( ):
 
         scope_setups.add_setup( a_setup )
         # setup end
+
+
+        # ----  a_setup with prefix >from write_reticle<
+        a_setup = ScopeSetup(
+                               setup_id         = "sunday test",
+
+                               scope_name       = "test3",
+                               scope_mag        = "test3 1/10",
+                               camera_name      = "test3 built in ",
+
+                               camera_usb_name  = "USB CAMERA: USB CAMERA",
+                               usb_format       = "320x240  Jpeg  30 fps",
+                               reticle_file     = "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/m_scope/reticles/10x_reticle.png",
+                               reticle_scale    =  1.6 )
+
+        scope_setups.add_setup( a_setup )
+        # setup end
+
+
 
         # ---- cameras setup end
         self.scope_setups       = scope_setups
@@ -526,7 +565,7 @@ class Parameters( ):
         """
         # from    app_global import AppGlobal
         # controller                  = AppGlobal.controller
-        import m_scope
+        pass
 
         # self.default_fn_functon     =  m_scope.gen_fn_stem
         # print( self.default_fn_functon( "file_prefix" ) )

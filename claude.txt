@@ -1,0 +1,38 @@
+One problem before the steps: **JPG has no transparency.** Every transparent pixel gets flattened onto a solid background colour when you export. The overlay tab only lets you see the base image through the overlay's transparent areas, so a JPG overlay would cover the base image completely. For the overlay, export **PNG** instead. The steps below are identical for PNG and JPG except for the file type.
+
+(The `fill_overlay_transparent()` method from before is in `image_overlay_view.py`, but I never ran it. A copy of the original file is at `scratchpad/image_overlay_view.py.bak`.)
+
+## 1. Make the page exactly the pixel size you want
+If the page matches the output size, the export is 1 page pixel = 1 image pixel, which gives exact dimensions and no scaling.
+
+1. **File → Document Properties** (`Shift+Ctrl+D`).
+2. Set the units to **px**.
+3. Set **Width** and **Height** to the exact target, e.g. `1920 × 1080`.
+4. Leave **Scale** at `1.0` (1 user unit per px).
+5. Leave the page background colour's alpha (the `A` in RGBA) at `0`, so the background stays transparent.
+
+Paper size doesn't matter beyond this; the page just defines the export area.
+
+## 2. Draw
+Anything you don't cover stays transparent. For partly transparent objects, use the **A** channel in Fill & Stroke (`Shift+Ctrl+F`) or the object's opacity slider.
+
+## 3. Export
+Inkscape 1.2 or later (check with `inkscape --version`):
+
+1. **File → Export** (`Shift+Ctrl+E`), then the **Single Image** tab.
+2. Choose **Page** as the export area.
+3. Set **DPI to 96**. At 96 DPI, 1 px in the document is 1 px in the file, so width and height should show exactly your page size. Check that they do.
+4. Pick the file type in the dropdown next to the filename: **PNG** for the overlay, **JPG** if you really want it flattened.
+5. Click **Export**.
+
+**About distortion:** the export dialog locks width and height to the export area's proportions, so it can't stretch the image. What can go wrong is rounding: if you type a width that doesn't fit the page's proportions, the height gets rounded and ends up a pixel off. Matching the page to the target size and exporting at 96 DPI avoids that.
+
+**If you do export JPG:** the transparent areas become the document background colour. My understanding is that it's the colour set in Document Properties, but I haven't checked that. If you want those areas yellow, either set that background to opaque yellow, or put a yellow rectangle on the bottom layer.
+
+**Inkscape 1.0 / 1.1:** those versions only export PNG. Use **Page**, set 96 DPI, and check the width and height the same way. For a JPG, convert the PNG afterwards.
+
+## Command-line alternative
+```bash
+inkscape drawing.svg --export-type=png --export-area-page --export-dpi=96 --export-filename=drawing.png
+```
+If the page is already the right size, this gives the exact dimensions. Don't pass both `--export-width` and `--export-height` unless their ratio matches the page, or you risk a stretched image.

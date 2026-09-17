@@ -16,26 +16,19 @@ import sys
 import os
 from   pathlib import Path
 from   functools import partial
-import functools
+
 import logging
 import time
 from datetime import datetime
 
 from qtpy import QtGui
-from qtpy.QtGui import QAction, QIcon, QPainter
+from qtpy.QtGui import QAction, QPainter
 
 
-from qtpy.QtCore import QAbstractListModel, QModelIndex, Qt
 
-from qtpy.QtCore import ( QDate,
-                          QDateTime,
-                          Qt,
-                          QTime )
+from qtpy.QtCore import ( QDate )
 
-from qtpy.QtWidgets import ( QComboBox,
-                             QDoubleSpinBox,
-                             QApplication, QMainWindow, QPushButton, QLineEdit, QVBoxLayout, QWidget,
-                             QFileDialog,
+from qtpy.QtWidgets import ( QApplication, QMainWindow, QPushButton, QLineEdit, QVBoxLayout, QWidget,
                              QHBoxLayout,
                              QDateEdit,
                              QDialog,
@@ -43,12 +36,8 @@ from qtpy.QtWidgets import ( QComboBox,
                              QTabWidget,
                              QLabel,
                              QPushButton,
-                             QSlider,
-                             QSpinBox,
                              QVBoxLayout,
                              )
-
-from qtpy.QtGui  import ( QPainter )
 
 
 # ---- local imports
@@ -86,7 +75,7 @@ COMPOSITION_MODES = [ ( "Normal ( over )", QPainter.CompositionMode.CompositionM
 IMAGE_FILTER    = ( "Images (*.png *.jpg *.jpeg *.bmp *.gif *.tif *.tiff *.webp);;All files (*)" )
 
 
-__VERSION__     = "ver_05 - 2026 09 13.01"
+__VERSION__     = "ver_06 - 2026 09 13.02"
 
 
 
@@ -101,9 +90,8 @@ class SetupDialog( QDialog ):
     #-----------------------------
     def setup_gui(self):
         """
-
+        what it says
         """
-
         self.setWindowTitle( "Enter Setup Name" )
 
         # Explicitly set the size (width, height)
@@ -132,7 +120,6 @@ class SetupDialog( QDialog ):
         widget.clicked.connect( self.reject )
         layout.addWidget(widget)
 
-
     #-----------------------------
     def get_name(self):
         """
@@ -140,17 +127,17 @@ class SetupDialog( QDialog ):
         """
         return self.setup_name_widget.text()
 
-
 # -------------------------------
 class MainWindow( QMainWindow ):
+    """
+    app mainwindow
+    """
     def __init__(self):
         """
         Build the main window
         """
         super().__init__()
            # breakpoint()
-
-        #self.setWindowTitle( "M Scope" )
 
         AppGlobal.controller    = self
         my_parameters           = parameters.Parameters()
@@ -163,7 +150,6 @@ class MainWindow( QMainWindow ):
         an_applogging    = app_logging.AppLogging( )
         # app_logging.init()
 
-
         qt_xpos             = my_parameters.qt_xpos
         qt_ypos             = my_parameters.qt_ypos
         qt_width            = my_parameters.qt_width
@@ -173,8 +159,6 @@ class MainWindow( QMainWindow ):
                            qt_ypos ,
                            qt_width,
                            qt_height  )
-
-        #app_logging.init()
 
         self.app_name           = "m_scope"
         self.camera_cal_tab     = None
@@ -193,11 +177,7 @@ class MainWindow( QMainWindow ):
         self.last_dir           = basedir  # for browse not sure good idea here
         self.current_fn_stem    = ""
 
-        # self.parameters         = parameters.Parameters( )
-        # AppGlobal.parameters    = self.parameters
-
         # after parameters are set up
-
         self.log_prog_info()
 
         # ---- build_gui
@@ -214,10 +194,11 @@ class MainWindow( QMainWindow ):
         self.setWindowTitle( f"M Scope  {__VERSION__}" )
         self.build_menu( )
 
-        icon    = QtGui.QIcon(  "./misc/broom_edit_2.png" )
-        icon    = QtGui.QIcon(  "./misc/magnifier.png" )
-        #/  !! move to parameters
-        self.setWindowIcon(icon)
+        # icon    = QtGui.QIcon(  "./misc/broom_edit_2.png" )
+        # icon    = QtGui.QIcon(  "./misc/magnifier.png" )
+        icon    = QtGui.QIcon( my_parameters.scope_icon )
+
+        self.setWindowIcon( icon )
 
         central_widget          = QWidget()
         self.setCentralWidget(central_widget)
@@ -236,11 +217,11 @@ class MainWindow( QMainWindow ):
         # ---- tabs
         self.tab_widget = QTabWidget()   # really the folder for the tabs
                                          # tabs themselves are just Widgets
-        # there is another approach using a style sheet acording to chat
+        # there is another approach using a style sheet according to chat
         self.tab_widget.setTabsClosable( False )
         #self.tab_widget.tabCloseRequested.connect( self.close_tab )
         # Set custom height for the tabs
-        self.tab_widget.setStyleSheet( "QTabBar::tab { height: 60px; }" )
+        self.tab_widget.setStyleSheet( "QTabBar::tab { height: 30px; }" )
 
         self.tab_widget.currentChanged.connect( self.on_tab_changed )
         self.tab_widget.tabBarClicked.connect(  self.on_tab_clicked )
@@ -252,37 +233,78 @@ class MainWindow( QMainWindow ):
 
         layout.addWidget( self.tab_widget   )
 
-        # ---- notes
+        # ---- tab notes
         tab                     = note_tab.NoteTab()
         self.note_tab           = tab
-        title                   = "Control\n and Notes"
+        title                   = "Control and Notes"
         self.tab_widget.addTab( tab, title  )
-
-       # self.add_camera_cal_tab( )
-
-            # tab                     = camera_cal_tab.CameraExploreTab()
-            # self.camera_ex_tab      = tab
-            # title                   = "Explore\nCamera"
-            # self.tab_widget.addTab( tab, title  )
 
         # ---- tab overlay
         tab                     = overlay_tab.OverlayTab()
         self.overlay_tab        = tab
-        title                   = "Overlay\nMeasure"
+        title                   = "Reticle - Measure"
         self.tab_widget.addTab( tab, title  )
-        my_parameters           = self.parameters
-
-        # for key, value in my_parameters.reticle_dict.items():
-        #     fn, scale           = value
-        #     file_name           = ( my_parameters.reticle_dir + "/" + fn ).replace( "//", "/" )
-        #     foo                 = partial( tab.on_load_with_scale, file_name, scale )
-        #     break
-
-        print( "still need to do reticule" )
 
         self.build_menu()
         self.mode_edit_setup_on( False )
 
+    # -------------------------------------
+    def build_device_row( self, layout ):
+        """
+        what it says -- pick a camera, pick a format, start, stop.  the combos
+        are filled from the widget, see on_camera_list / on_format_list
+        """
+        my_parameters       = AppGlobal.parameters
+
+        row_layout          = QHBoxLayout(   )
+        layout.addLayout( row_layout )
+
+        # ---- setup id
+        a_widget            = QLabel( "Setup ID valid:" )
+        row_layout.addWidget( a_widget )
+
+        scope_dict              = my_parameters.scope_setups.get_setup_dict()
+        widget                  = cb_dict.CQComboBoxDict( scope_dict, display_keys = True )
+        self.setup_id_widget    = widget
+        widget.currentIndexChanged.connect( self.setup_id_widget_changed )
+        widget.set_current_key( list(scope_dict.keys())[ 0 ] )
+        row_layout.addWidget( widget, stretch = 2 )
+
+        # ---- camera name
+        a_widget                = QLabel( "Camera Name:" )
+        row_layout.addWidget( a_widget )
+
+        a_widget                = QLineEdit( "a_camera_name" )
+        self.camera_name_widget = a_widget
+        row_layout.addWidget( a_widget, )   #stretch = 2 )
+
+        # ---- camera sensor
+        a_widget            = QLabel( "Camera/Sensor:" )
+        row_layout.addWidget( a_widget )
+
+        # a_widget            = QComboBox( )
+        a_widget            = QLineEdit( "xxx" )
+        self.csensor_widget = a_widget
+        a_widget.setMinimumWidth( 240 )
+        a_widget.setReadOnly( True )
+        #a_widget.currentIndexChanged.connect( self.on_device_combo_changed )
+        # self.device_combo   = a_widget   # phase out
+        # self.device_widget  = a_widget
+        row_layout.addWidget( a_widget )
+
+        # ---- usb format
+        a_widget            = QLabel( "USB Format:" )
+        row_layout.addWidget( a_widget )
+
+        a_widget                = QLineEdit( )
+        self.usb_format_widget  = a_widget
+        a_widget.setReadOnly( True )
+        a_widget.setMinimumWidth( 220 )
+        #a_widget.currentIndexChanged.connect( self.on_sensor_widget_changed )
+        #self.format_combo   = a_widget
+        row_layout.addWidget( a_widget )
+
+        row_layout.addStretch( 1 )
 
     # -------------------------------------
     def build_thing_row( self, layout ):
@@ -301,8 +323,8 @@ class MainWindow( QMainWindow ):
         row_layout.addWidget( widget, )
 
         # -----
-        widget                      =  QLineEdit(  )
-        self.microscope_widget      = widget
+        widget                  = QLineEdit(  )
+        self.microscope_widget  = widget
         # keys                        = my_parameters.scope_dict.keys()
         # #widget.currentIndexChanged.connect( self.microscope_widget_index_changed )
         # #widget.clicked.connect( self.test2    )
@@ -310,102 +332,26 @@ class MainWindow( QMainWindow ):
         row_layout.addWidget( widget, )
 
         # ---- objective  self.scope_mag          = scope_mag
-        a_widget            = QLabel( "Objective:" )
+        a_widget                = QLabel( "Objective:" )
         row_layout.addWidget( a_widget )
 
         a_widget                = QLineEdit( "objective" )
         self.objective_widget   = a_widget
         row_layout.addWidget( a_widget, ) # stretch = 2 )
 
-        # ---- objective  self.scope_mag          = scope_mag
-        a_widget            = QLabel( "Mode:not set" )
+        # ---- mode
+        a_widget                = QLabel( "Mode:not set" )
         self.mode_widget        = a_widget
         row_layout.addWidget( a_widget )
 
-        # a_widget                = QLineEdit( "what mode " )
-        # self.mode_widget        = a_widget
-        # row_layout.addWidget( a_widget, ) # stretch = 2 )
+        # ---- switch_camera_tab button label in self.switch_camera_tab
+        widget                   = QPushButton( "switch_camera_tab"   )
+        self.switch_mode_widget  = widget
+        widget.clicked.connect( self.switch_camera_tab )
+        row_layout.addWidget( widget, )
 
         row_layout.addStretch( 1 )
 
-
-        # a_widget            = QPushButton( "Write setup" )
-        # a_widget.clicked.connect( self.write_setup_config )
-        # row_layout.addWidget( a_widget )
-
-    # -------------------------------------
-    def build_device_row( self, layout ):
-        """
-        what it says -- pick a camera, pick a format, start, stop.  the combos
-        are filled from the widget, see on_camera_list / on_format_list
-        """
-        parameters          = AppGlobal.parameters
-        controller          = AppGlobal.controller
-
-        row_layout          = QHBoxLayout(   )
-        layout.addLayout( row_layout )
-
-        # # ---- setup dict
-        # a_widget            = QComboBox(   )
-        # a_widget.setMinimumWidth( 220 )
-
-        # values               = AppGlobal.parameters.setup_dict.keys()
-        # a_widget.addItems( values )
-        # #self.format_combo   = a_widget
-        # device_layout.addWidget( a_widget )
-
-        # ---- setup id
-        a_widget            = QLabel( "Setup ID valid:" )
-        row_layout.addWidget( a_widget )
-
-        # a_widget                = QLineEdit( "Setup id" )
-        # self.setup_id_widget    = a_widget
-        # device_layout.addWidget( a_widget, stretch = 2 )
-
-        scope_dict              = parameters.scope_setups.get_setup_dict()
-        widget                  = cb_dict.CQComboBoxDict( scope_dict, display_keys = True )
-        self.setup_id_widget    = widget
-        widget.currentIndexChanged.connect( self.setup_id_widget_changed )
-        widget.set_current_key( list(scope_dict.keys())[ 0 ] )
-        row_layout.addWidget( widget, stretch = 2 )
-
-        # ---- camera name
-        a_widget                = QLabel( "Camera Name:" )
-        row_layout.addWidget( a_widget )
-
-        a_widget                = QLineEdit( "a_camera_name" )
-        self.camera_name_widget = a_widget
-        row_layout.addWidget( a_widget, )   #stretch = 2 )
-
-
-        # ---- camera sensor
-        a_widget            = QLabel( "Camera/Sensor:" )
-        row_layout.addWidget( a_widget )
-
-        # a_widget            = QComboBox( )
-        a_widget            = QLineEdit( "xxx" )
-        self.csensor_widget = a_widget
-        a_widget.setMinimumWidth( 240 )
-        a_widget.setReadOnly( True )
-        #a_widget.currentIndexChanged.connect( self.on_device_combo_changed )
-        # self.device_combo   = a_widget   # phase out
-        # self.device_widget  = a_widget
-        row_layout.addWidget( a_widget )
-
-        # ----
-        a_widget            = QLabel( "USB Format:" )
-        row_layout.addWidget( a_widget )
-
-        a_widget                = QLineEdit( )
-        self.usb_format_widget  = a_widget
-        a_widget.setReadOnly( True )
-        a_widget.setMinimumWidth( 220 )
-        #a_widget.currentIndexChanged.connect( self.on_sensor_widget_changed )
-        #self.format_combo   = a_widget
-        row_layout.addWidget( a_widget )
-
-
-        row_layout.addStretch( 1 )
 
     # -------------------------------------
     def build_action_row( self, layout ):
@@ -413,61 +359,16 @@ class MainWindow( QMainWindow ):
         what it says -- pick a camera, pick a format, start, stop.  the combos
         are filled from the widget, see on_camera_list / on_format_list
         """
-        parameters          = AppGlobal.parameters
-        controller          = AppGlobal.controller
-
         row_layout          = QHBoxLayout(   )
         layout.addLayout( row_layout )
 
-        # a_widget            = QPushButton( "Create Setup" )
-        # self.write_setup_widget = a_widget
-        # a_widget.clicked.connect( self.write_setup_config )
-        # row_layout.addWidget( a_widget )
-
-        # ---- switch_camera_tab
-        widget                   =  QPushButton( "switch_camera_tab"   )
-        self.switch_mode_widget  = widget
-        widget.clicked.connect( self.switch_camera_tab )
-        row_layout.addWidget( widget, )
-
-        # # ---- dual_write
-        # widget          =  QPushButton( "dual_write" )
-        # #self.output_edit    = widget
-        # widget.clicked.connect( self.dual_write  )
-        # row_layout.addWidget( widget, )
-
         # ---- write_reticle
-        widget          =  QPushButton( "write_reticle" )
-        #self.output_edit    = widget
+        widget          =  QPushButton( "Write Reticle -\nMearurement" )
         widget.clicked.connect( self.write_reticle  )
         row_layout.addWidget( widget, )
 
-        # # ---- dual_write
-        # widget          =  QPushButton( "*dual_write" )
-        # #self.output_edit    = widget
-        # widget.clicked.connect( self.dual_write  )
-        # row_layout.addWidget( widget, )
-
-        # # ---- write_setup
-        # widget          =  QPushButton( "*write_setup" )
-        # #self.output_edit    = widget
-        # widget.clicked.connect( self.write_reticle  )
-        # row_layout.addWidget( widget, )
-
-        # ---- "write note"
-        widget          =  QPushButton( "*write_note" )
-        #self.output_edit    = widget
-        widget.clicked.connect( self.write_note )
-        row_layout.addWidget( widget, )
-
-        # ---- test something
-        widget          =  QPushButton( "*test something" )
-        #self.output_edit    = widget
-        widget.clicked.connect( self.setup_name_from_dialog )
-        row_layout.addWidget( widget, )
-
         # ---- date
-        widget          =  QLabel( "Date code:"  )
+        widget          =  QLabel( "Date Tag:"  )
         row_layout.addWidget( widget, )
 
         widget                  =  QDateEdit( )
@@ -481,7 +382,7 @@ class MainWindow( QMainWindow ):
         row_layout.addWidget( widget, )
 
         # ---- item = tag code
-        widget          =  QLabel( "Tag code:"  )
+        widget          =  QLabel( "Id Tag:"  )
         row_layout.addWidget( widget, )
 
         # ---- item code widget
@@ -505,7 +406,6 @@ class MainWindow( QMainWindow ):
         # Create the menu bar
         menubar   = self.menuBar()
         #menu_bar.Append(menu_1, "tx_menu_1")
-        # menu_bar.Append(menu_2, "tx_menu_2")
 
         # ---- Configuration ............
         a_menu          = menubar.addMenu("Configuration")
@@ -533,12 +433,8 @@ class MainWindow( QMainWindow ):
 
         # #---------------
 
-
         menu_1      = menu_bar.addMenu( "Configuration" )
 
-        action      = menu_1.addAction( "Show Parameters" )
-        #self.Bind(wx.EVT_MENU, self.menu_function, widget  )
-        # self.Bind( wx.EVT_MENU, AppGlobal.os_open_txt_file, "parameters.py" )
 
         partial_function = partial( self.menu_open_txt_file, file_name = "parameters.py" )
         action.triggered.connect( partial_function )
@@ -548,10 +444,6 @@ class MainWindow( QMainWindow ):
         partial_function = partial( self.menu_open_txt_file, file_name = "readme_rsh.txt" )
         action.triggered.connect( partial_function )
 
-        #---- Edit Log File
-        action    = menu_1.addAction( "Edit Log File" )
-        partial_function = partial( self.menu_open_txt_file, file_name = self.parameters.pylogging_fn  )
-        action.triggered.connect( partial_function )
 
         # ---- Help
         menu_2      = menu_bar.addMenu( "Help" )
@@ -569,17 +461,6 @@ class MainWindow( QMainWindow ):
         # help_function    = partial( AppGlobal.os_open_txt_file, "./help/technical.txt" )
         # a_menu.add_command( label   = "Show Technical Information",
 
-        #----
-        action    = menu_2.addAction( "About..." )
-        # partial_function = partial( self.menu_open_txt_file, file_name = "about.txt"  )
-        # action.triggered.connect( partial_function )
-
-
-        # about_action1 = QAction( "About...", self )   # or is just a function just as good
-        #action.triggered.connect( self.show_about_box )
-
-        # a_menu.add_command( label   = "Show Parameters",
-        #                     command = self.show_parms )
 
     # --------------------------------------------
     def log_prog_info( self,  ):
@@ -597,7 +478,7 @@ class MainWindow( QMainWindow ):
         logger.log( fll, title )
         logger.log( fll, "" )
 
-        if len( sys.argv ) == 0:   # !! but will noramally be   ['/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/m_scope/m_scope.py'] or similar !!
+        if len( sys.argv ) == 0:   # ??
             logger.info( "no command line arg " )
         else:
             for ix_arg, i_arg in enumerate( sys.argv ):
@@ -626,7 +507,7 @@ class MainWindow( QMainWindow ):
                   camera name
                   microscope
                   objective mag
-                  redicule file open
+                  ridicule file open
 
 
         """
@@ -647,17 +528,15 @@ class MainWindow( QMainWindow ):
 
         if on_off_flag:
             tab     = self.add_camera_cal_tab()
-            self.mode_widget.setText( "Mode: Create Setup" )
-            self.switch_mode_widget.setText( "to use")
+            self.mode_widget.setText( "Mode: Create \nCalibration Setup" )
+            self.switch_mode_widget.setText( "Change Mode\nto Measure")
 
         else:
             tab     = self.add_user_camera_tab()
-            self.mode_widget.setText( "Mode: Use Setup" )
-            self.switch_mode_widget.setText( "to create")
+            self.mode_widget.setText( "Mode: Measure \nUsing Setup" )
+            self.switch_mode_widget.setText( "Change Mode\nto Calibrate" )
             # !! make sure mode is one in current drop down
             self.setup_id_widget_changed( )
-
-
 
         self.enable_load_reticle_widget( on_off_flag )
 
@@ -677,6 +556,7 @@ class MainWindow( QMainWindow ):
         """
         if self.camera_user_tab:
             return  self.camera_user_tab
+
         else:
             return self.camera_cal_tab
 
@@ -686,14 +566,12 @@ class MainWindow( QMainWindow ):
         """
         what it says, should fail silently or perhaps add a return code
         """
-
         tab_widget      = self.tab_widget
 
         try:
             index       = tab_widget.indexOf( widget )
 
         except:
-            pass
             return
 
         if index < 0:
@@ -701,7 +579,6 @@ class MainWindow( QMainWindow ):
 
         tab_widget.removeTab( index )
         widget.deleteLater()
-
 
     # -------------------------------------
     def setup( self, a_setup ):
@@ -746,7 +623,7 @@ class MainWindow( QMainWindow ):
 
         tab                     = camera_user_tab.CameraUserTab()
         self.camera_user_tab    = tab
-        title                   = "The\nCamera"
+        title                   = "Specimen Camera"
         self.tab_widget.addTab( tab, title  )
 
         return tab
@@ -764,7 +641,7 @@ class MainWindow( QMainWindow ):
 
         tab                     = camera_cal_tab.CameraCalTab()
         self.camera_cal_tab     = tab
-        title                   = "Camera\nCalibration"
+        title                   = "Calibration Camera"
         self.tab_widget.addTab( tab, title  )
 
         return tab
@@ -798,9 +675,8 @@ class MainWindow( QMainWindow ):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
-    # -------
     # -------------------------------------
-    def write_setup_config( self, ):
+    def write_setup_configxxx( self, ):
         """
         what it says
 
@@ -888,7 +764,6 @@ class MainWindow( QMainWindow ):
         self.note_tab.display_string( "\n")
         self.note_tab.display_string( msg )
 
-
     # -------------------------------------
     def setup_id_widget_changed( self, ):
         """
@@ -960,37 +835,41 @@ class MainWindow( QMainWindow ):
         """
         add image info to the message area
             check in right mode ?
-
+            zz
         """
-
         if self.mode_edit_setup:
             mode    = "mode = edit_setup"
         else:
             mode    = "mode = user_mode"
 
-        msg        = f"""
-        Adding image with prefix >{prefix}<
-        image file name   = {image_fn}
+        base_fn     = self.get_base_fn( )
+        x, y        = self.get_x_y()
 
+        msg         = f"""
+        add_image_info_to_msg
+        Adding image with prefix >{prefix}< in mode >{mode}<
+        image file name   = {image_fn}
+        base_file_name    = {base_fn}
+        x position        = {x}
+        y position        = {y}
                             """
 
         text_edit    = self.note_tab.message_area.text_edit
         text_edit.append( msg )
 
-
     # -------------------------------
     def add_setup_to_msg( self, prefix  ):
         """
-        depricate and remove
+        deprecate and remove
         add info to the message area
         check in right mode ?
-        this is the seup info -- not quite right for camera
+        this is the setup info -- not quite right for camera
         """
         a_camera_cal_tab    = self.camera_cal_tab
         a_note_tab          = self.note_tab
         a_overlay_tab       = self.overlay_tab
 
-        # in some case may want to paramaterize
+        # in some case may want to parameterize
         #setup_id            = "get from user" #
 
         if self.mode_edit_setup:
@@ -1003,8 +882,6 @@ class MainWindow( QMainWindow ):
             setup_id            = self.setup_id_widget.currentText()
 
         scope_name          = self.get_widget_mscope_name( )
-
-        scope_mag           = self.get_widget_objective_name()
 
         camera_name         = self.get_widget_camera_name()
 
@@ -1020,8 +897,6 @@ class MainWindow( QMainWindow ):
 
         objective            = self.get_widget_objective_name()
 
-       #  scope_mag            = objective  # so not used
-
        # format_text         = a_camera_cal_tab.sensor_widget.currentText()
 
        # self.camera_id_widget.setText( format_text )
@@ -1031,6 +906,7 @@ class MainWindow( QMainWindow ):
         # print( msg )
 
         msg        = f"""
+        add_setup_to_msg
         # ----  a_setup with prefix >{prefix}<
         a_setup = ScopeSetup(
                                setup_id         = "{setup_id}",
@@ -1052,21 +928,19 @@ class MainWindow( QMainWindow ):
         text_edit    = self.note_tab.message_area.text_edit
         text_edit.append( msg )
 
-
     # -------------------------------
     def add_to_msg( self, prefix  ):
         """
-        depricate and remove
+        deprecate and remove
         add info to the message area
         check in right mode ?
-        this is the seup info -- not quite right for camera
+        this is the setup info -- not quite right for camera
         """
         a_camera_cal_tab    = self.camera_cal_tab
         a_note_tab          = self.note_tab
         a_overlay_tab       = self.overlay_tab
 
-
-        # in some case may want to paramaterize
+        # in some case may want to parameterize
         #setup_id            = "get from user" #
         setup_id            = self.setup_id_widget.currentText()
 
@@ -1099,6 +973,7 @@ class MainWindow( QMainWindow ):
         # print( msg )
 
         msg        = f"""
+        add_to_msg
         # ----  a_setup with prefix >{prefix}<
         a_setup = ScopeSetup(
                                setup_id         = "{setup_id}",
@@ -1120,7 +995,6 @@ class MainWindow( QMainWindow ):
         text_edit    = self.note_tab.message_area.text_edit
         text_edit.append( msg )
 
-
     # ------------------------------------
     def setup_name_from_dialog( self ):
         """
@@ -1141,25 +1015,52 @@ class MainWindow( QMainWindow ):
     # -------------------------------
     def on_snap_still( self, ):
         """
-        similar to dual_write whose name may be change soon
+        this is the user mode
+        similar to dual_wwrite whose name may be change soon
             write out the camera photo and the notes
             useful in app
         """
         self.tab_widget.setCurrentWidget( self.note_tab )
-        self.add_to_msg( "from on_snap_still" )
 
         try:
             fn_no_ext       = self.get_fn_no_ext()
                 # we get once but use twice
 
         except ValueError:
-            pass  #  message already issued
             return
 
-        # tab_note        = self
+        file_name       = self.get_file_name( fn_no_ext, ".txt" )
+
+        tab_note        = self.note_tab
+        self.add_image_info_to_msg( file_name, "from on_snap_still_cal" )
+        self.add_to_msg( "from on_snap_still" )
+
+        self.save_msg_area_to_file( file_name )
+
+        tab             = self.get_camera_tab( )
+        tab.save_snap( fn_no_ext )
+
+    # -------------------------------
+    def on_snap_still_cal( self, ):
+        """
+        this is in the calibrate mode
+
+        """
+        self.tab_widget.setCurrentWidget( self.note_tab )
+
+        try:
+            fn_no_ext       = self.get_fn_no_ext()
+                # we get once but use twice
+
+        except ValueError:
+            return
+
         file_name       = self.get_file_name( fn_no_ext, ".txt" )
         tab_note        = self.note_tab
-        #note_tab.save_file( file_name )
+
+        self.add_image_info_to_msg( file_name, "from on_snap_still_cal" )
+        self.add_to_msg( "from on_snap_still_cal" )
+
         self.save_msg_area_to_file( file_name )
 
         tab             = self.get_camera_tab( )
@@ -1168,19 +1069,17 @@ class MainWindow( QMainWindow ):
     # -------------------------------
     def write_reticle( self, ):
         """
-        write_reticle copy of but change dual_write
+        write_reticle copy of but change dual_wwrite
             write out the overlay photo and the notes
-            how does this differe from other wites and
+            how does this differed from other writes and
             calibration
             zz
         """
-
         try:
             fn_no_ext       = self.get_fn_no_ext()
                 # we get once but use twice
 
         except ValueError:
-            pass  #  message already issued
             return
 
         # tab_note        = self
@@ -1204,21 +1103,20 @@ class MainWindow( QMainWindow ):
         self.save_msg_area_to_file( file_name )
 
     # -------------------------------
-    def dual_write( self, ):
+    def dual_writexxxx( self, ):
         """
         dual_write
             write out the overlay photo and the notes
-            this may be obsolute, see write+reticle
+            this may be absolute, see write+reticle
         """
         self.tab_widget.setCurrentWidget( self.note_tab )
-        self.add_to_msg( "from dual_write >> stop using" )
+        self.add_to_msg( "from dual_wwrite >> stop using" )
 
         try:
             fn_no_ext       = self.get_fn_no_ext()
                 # we get once but use twice
 
         except ValueError:
-            pass  #  message already issued
             return
 
         # tab_note        = self
@@ -1252,7 +1150,6 @@ class MainWindow( QMainWindow ):
             stem    = self.get_fn_no_ext()
 
         except ValueError:
-            pass  #  message already issued
             return
 
         file_name   = stem + ".txt"
@@ -1268,7 +1165,7 @@ class MainWindow( QMainWindow ):
     # -------------------------------------
     def save_msg_area_to_file( self, file_name ):
         """
-        overrite
+        overwrite
         """
         note_tab    = self.note_tab
         the_text    = note_tab.message_area.get_plain_text()
@@ -1316,12 +1213,12 @@ class MainWindow( QMainWindow ):
     # ---- get set enable !! could make widget names properties ?? ============================
     # ---- item code
     def get_item_code( self,  ):
-         """
-         what it says
-         """
-         value      = self.item_code_widget.text()
+        """
+        what it says
+        """
+        value      = self.item_code_widget.text()
 
-         return value
+        return value
 
     # -------------------------------------
     def set_item_code( self, value ):
@@ -1338,20 +1235,20 @@ class MainWindow( QMainWindow ):
         from the widget
         """
         widget       = self.item_code_widget
-        widget.setReadOnly( not( enable ) )
+        widget.setReadOnly( not enable )
 
         return
 
     # ---- mscope_name ...........................
     # -------------------------------------
     def get_note_text( self,  ):
-         """
-         what it says
-         """
-         tab        = self.note_tab
-         value      = tab.message_area.get_plain_text()
+        """
+        what it says
+        """
+        tab        = self.note_tab
+        value      = tab.message_area.get_plain_text()
 
-         return value
+        return value
 
     # ---------------------
     #         # ---- objective  self.scope_mag          = scope_mag
@@ -1426,208 +1323,268 @@ class MainWindow( QMainWindow ):
         widget       = self.camera_name_widget
         widget.setReadOnly( not( enable ) )
 
-
     # ---- csensor  camera_sensor_name ...................
-
     # -------------------------------------
     def get_widget_csensor_name( self,  ):
-         """
-         may depend on mode,
+        """
+        may depend on mode,
 
-         self.camera_cal_tab
+        self.camera_cal_tab
 
-         self.camera_user_tab
+        self.camera_user_tab
 
-         a_widget            = QComboBox(   )
-         self.device_combo   = a_widget
+        a_widget            = QComboBox(   )
+        self.device_combo   = a_widget
 
-         """
-         mode         = self.mode_edit_setup
-         if mode:
-             # setup mode
-             tab        = self.camera_cal_tab
-             value      = tab.device_combo.currentText()     #  QComboBox
-         else:
-             widget       = self.csensor_widget
-             value        = widget.text()
+        """
+        mode         = self.mode_edit_setup
+        if mode:
+            # setup mode
+            tab        = self.camera_cal_tab
+            value      = tab.device_combo.currentText()     #  QComboBox
+        else:
+            widget       = self.csensor_widget
+            value        = widget.text()
 
-         return value
+        return value
 
     # -------------------------------------
     def set_widget_csensor_name( self, name ):
-         """
-         from the widget
-         """
-         widget       = self.csensor_widget
-         widget.setText( name )
+        """
+        from the widget
+        """
+        widget       = self.csensor_widget
+        widget.setText( name )
 
-         if self.mode_edit_setup:
-             tab          = self.camera_cal_tab
-             # tab.set_widget_usb_format_name( name )
-             tab.set_widget_device_combo_name( name  )
-
-         return
+        if self.mode_edit_setup:
+            tab          = self.camera_cal_tab
+            # tab.set_widget_usb_format_name( name )
+            tab.set_widget_device_combo_name( name  )
 
     # -------------------------------------
     def enable_widget_csensor_name( self, enable = True ):
-         """
-         from the widget
-         """
-         widget       = self.csensor_widget
-         widget.setReadOnly( not( enable ) )
+        """
+        from the widget
+        """
+        widget       = self.csensor_widget
+        widget.setReadOnly( not( enable ) )
 
     # ---- scale ...................
     # -------------------------------------
     def get_scale( self,  ):
-         """
-         what it says
-         """
-         tab          = self.overlay_tab
-         widget       = tab.scale_widget
-         value        = widget.value()
+        """
+        what it says
+        """
+        tab          = self.overlay_tab
+        widget       = tab.scale_widget
+        value        = widget.value()
 
-         return value
+        return value
 
     # -------------------------------------
     def set_scale( self, value ):
-         """
-         what it says
-         """
-         tab          = self.overlay_tab
-         widget       = tab.scale_widget
-         widget.setValue( value )
-
-         return
+        """
+        what it says
+        """
+        tab          = self.overlay_tab
+        widget       = tab.scale_widget
+        widget.setValue( value )
 
     # -------------------------------------
     def enable_scale_widget( self, enable = True ):
-         """
-         what it says
-             plus reset
-         """
-         tab          = self.overlay_tab
-         widget       = tab.scale_widget
-         widget.setReadOnly( not( enable ) )
-         #widget.setEnabled( enable  )
+        """
+        what it says
+            plus reset
+        """
+        tab          = self.overlay_tab
+        widget       = tab.scale_widget
+        widget.setReadOnly( not enable )
+        #widget.setEnabled( enable  )
 
-         widget       = tab.reset_widget
-         widget.setEnabled( enable  )
+        widget       = tab.reset_widget
+        widget.setEnabled( enable  )
 
-         return
+    # ---- base_fn_widget ...................
+    def get_base_fn( self,  ):
+        """
+        what it says zz base_fn_widget
+        """
+        tab          = self.overlay_tab
+        widget       = tab.base_fn_widget
+        value        = widget.text()
+
+        return value
+
+    # -------------------------------------
+    def set_base_fnxxx( self, file_name ):
+        """
+        set the value and load the file
+            file_name is in the reticle_dir
+        """
+        a_dir    = self.parameters.reticle_dir
+        fn       = ( a_dir + "/"  + file_name ).replace( "//", "/" )
+            # now full file name
+
+        tab          = self.overlay_tab
+        msg          = tab.load_overlay( fn ) # loads file set name
+
+        return msg   # msg on a fail else ""
+
+    # -------------------------------------
+    def enable_base_fn_wdiget( self, enable = True ):
+        """
+        this widget is a label so not an edit no read only
+        """
+        return
 
     # ---- reticle ...................
     def get_reticle( self,  ):
-         """
-         what it says
-         """
-         tab          = self.overlay_tab
-         widget       = tab.reticle_fn_widget
-         value        = widget.text()
+        """
+        what it says zz
+        """
+        tab          = self.overlay_tab
+        widget       = tab.reticle_fn_widget
+        value        = widget.text()
 
-         return value
+        return value
 
     # -------------------------------------
     def set_reticle( self, file_name ):
-         """
-         set the value and load the file
-             file_name is in the reticle_dir
-         """
-         dir      = self.parameters.reticle_dir
-         fn       = ( dir + "/"  + file_name ).replace( "//", "/" )
-             # now full file name
+        """
+        set the value and load the file
+            file_name is in the reticle_dir
+            !! is this correct
+        """
+        dir      = self.parameters.reticle_dir
+        fn       = ( dir + "/"  + file_name ).replace( "//", "/" )
+            # now full file name
 
-         tab          = self.overlay_tab
-         msg          = tab.load_overlay( fn ) # loads file set name
+        tab          = self.overlay_tab
+        msg          = tab.load_overlay( fn ) # loads file set name
 
-         return msg   # msg on a fail else ""
+        return msg   # msg on a fail else ""
 
     # -------------------------------------
     def enable_reticle_wdiget( self, enable = True ):
-         """
-         this widget is a lable so not an edit no read only
-         """
-         return
+        """
+        this widget is a label so not an edit no read only
+        """
+        return
+
+    # ---- x_y = x and y ...................
+    def get_x_y( self,  ):
+        """
+        what it says zz
+        """
+        tab          = self.overlay_tab
+        widget       = tab.y_spin
+        y_value      = widget.value()
+
+        widget       = tab.x_spin
+        x_value      = widget.value()
+
+        return x_value, y_value
+
+    # # -------------------------------------
+    # def set_x_y( self, file_name ):
+    #     """
+    #     set the value and load the file
+    #         file_name is in the reticle_dir
+    #         !! is this correct
+    #     """
+    #     dir      = self.parameters.reticle_dir
+    #     fn       = ( dir + "/"  + file_name ).replace( "//", "/" )
+    #         # now full file name
+
+    #     tab          = self.overlay_tab
+    #     msg          = tab.load_overlay( fn ) # loads file set name
+
+    #     return msg   # msg on a fail else ""
+
+    # # -------------------------------------
+    # def enable_x_y_wdiget( self, enable = True ):
+    #     """
+    #     this widget is a label so not an edit no read only
+    #     """
+    #     return
 
     # ---- mscope_name ...........................
     def get_widget_mscope_name( self,  ):
-         """
-         what it says
-         """
-         widget       = self.microscope_widget
-         value        = widget.text()
+        """
+        what it says
+        """
+        widget       = self.microscope_widget
+        value        = widget.text()
 
-         return value
+        return value
 
     # -------------------------------------
     def set_widget_mscope_name( self, camera_name ):
-         """
-         what it says
-         """
-         widget       = self.microscope_widget
-         widget.setText( camera_name )
-
-         return
+        """
+        what it says
+        """
+        widget       = self.microscope_widget
+        widget.setText( camera_name )
 
     # -------------------------------------
     def enable_widget_mscope_name( self, enable = True ):
-         """
-         what it says
-         """
-         widget       = self.microscope_widget
-         widget.setReadOnly( not( enable ) )
-
-         return
+        """
+        what it says
+        """
+        widget       = self.microscope_widget
+        widget.setReadOnly( not( enable ) )
 
     # ----  usb format
     def get_widget_usb_format_name( self,  ):
-         """
-         what it says
-         zz
+        """
+        what it says
+        zz
 
-         self.sensor_widget   = QComboBox(   )
-         """
-         mode         = self.mode_edit_setup
-         if mode:
-             # setup mode
-             tab        = self.camera_cal_tab
-             value      = tab.sensor_widget.currentText()     #  QComboBox
-         else:
-             widget       = self.usb_format_widget
-             value        = widget.text()
+        self.sensor_widget   = QComboBox(   )
+        """
+        mode         = self.mode_edit_setup
+        if mode:
+            # setup mode
+            tab        = self.camera_cal_tab
+            value      = tab.sensor_widget.currentText()     #  QComboBox
 
-         return value
+        else:
+            widget       = self.usb_format_widget
+            value        = widget.text()
+
+        return value
 
     # -------------------------------------
     def set_widget_usb_format_name( self, name ):
-         """
-         from the widget
+        """
+        from the widget
 
-            return
-                None or exception
-         """
-         widget       = self.usb_format_widget
-         widget.setText( name )
+           return
+               None or exception
+        """
+        widget       = self.usb_format_widget
+        widget.setText( name )
 
-         if   self.mode_edit_setup:
-             tab          = self.camera_cal_tab
-             tab.set_widget_usb_format_name( name )
+        if   self.mode_edit_setup:
+            tab          = self.camera_cal_tab
+            tab.set_widget_usb_format_name( name )
 
     # -------------------------------------
     def enable_widget_usb_format_name( self, enable = True ):
-         """
-         from the widget
-         """
-         widget       = self.usb_format_widget
-         widget.setReadOnly( not( enable ) )
+        """
+        from the widget
+        """
+        widget       = self.usb_format_widget
+        widget.setReadOnly( not( enable ) )
 
     # -------------------------------------
     def enable_load_reticle_widget( self, enable = True ):
-         """
-         from the widget
-         """
-         tab          = self.overlay_tab
-         widget       = tab.load_reticle_widget
-         widget.setEnabled( enable )
+        """
+        from the widget
+        """
+        tab          = self.overlay_tab
+        widget       = tab.load_reticle_widget
+        widget.setEnabled( enable )
 
     # -------------------------------------
     def get_file_name( self, fn_no_ext, ext ):
@@ -1645,13 +1602,6 @@ class MainWindow( QMainWindow ):
 
         return file_name
 
-    # # -------------------------------------
-    # def build_menu( self, ):
-    #     """
-    #     what it says
-    #     """
-    #     return
-
     # -------------------------------------
     def on_tab_changed( self, ):
         """ """
@@ -1667,7 +1617,7 @@ class MainWindow( QMainWindow ):
         """
         setup_id         = utils.get_setup_from_file( file_name )
 
-        return
+        return  ""  # ?? is this right
 
         a_list    = utils.read_file_to_list( file_name )
 
@@ -1683,6 +1633,7 @@ class MainWindow( QMainWindow ):
                 setup  = splits[1]
                 print( f"get_setup_from_file() found setup >{setup}<")
                 break
+
         else:
             setup  = ""
 
@@ -1692,10 +1643,7 @@ class MainWindow( QMainWindow ):
     def test_something( self,  ):
         """
 
-
         """
-        file_name   = "/mnt/8ball1/first6_root/russ/0000/python00/python3/_projects/m_scope/temp_photo/2026_09_07_ff_073613.txt"
-        self.get_setup_from_file( file_name)
 
 # -------------------------------------
 def main(): # do not remove
@@ -1710,6 +1658,3 @@ def main(): # do not remove
 #if __name__ == '__main__':
 
 # ---- eof
-
-
-

@@ -15,59 +15,28 @@ if __name__ == "__main__":
 
 
 # ---- imports
-import sys
 import os
-from   pathlib import Path
 
 
-from qtpy import QtGui
+from qtpy.QtWidgets import QVBoxLayout, QWidget
 
-from qtpy.QtCore import ( QDate,
-                          QDateTime,
-                          Qt,
-                          QTime )
-
-
-
-from qtpy.QtWidgets import QApplication, QMainWindow, QPushButton, QLineEdit, QVBoxLayout, QWidget
-
-from qtpy.QtWidgets import ( QComboBox,
-                             QDoubleSpinBox,
-                             QFileDialog,
-                             QHBoxLayout,
-                             QTabWidget,
-                             QTextEdit,
-                             QDialog,
-                             QDateEdit,
-                             QLabel,
-                             QPushButton,
-                             QSlider,
-                             QSpinBox,
+from qtpy.QtWidgets import ( QFileDialog,
                              QVBoxLayout,
                              )
 
-from qtpy.QtCore import ( Qt, QTimer )
 
-from qtpy.QtGui  import ( QPainter )
-
-
-from    camera_capture_widget import CameraCaptureWidget
-#import  parameters
-#import  image_overlay_view
 import  gui_qt_ext
 #import  custom_widgets as cw
 
 from    app_global import AppGlobal
 # ---- constants
 
-
 basedir         = os.path.dirname( os.path.abspath( __file__ ) )
 
 DEFAULT_OUTPUT  = "./output"        # only if parameters is not up, see _start_save_dir
 CAMERA_SUB_DIR  = "camera"
 
-
-
+# ---------------------------------------
 class NoteTab( QWidget ):
     def __init__( self, ):
         """
@@ -76,10 +45,6 @@ class NoteTab( QWidget ):
         super().__init__()
         layout    = QVBoxLayout( self )
 
-        #self.build_gui_widgets( layout )
-
-        # ---- try both
-        #self.build_gui_bot( layout )
         self.gui( layout )
 
     # -------------------------------
@@ -94,6 +59,7 @@ class NoteTab( QWidget ):
         # ---- message area
         widget                  = gui_qt_ext.MessageArea()
         self.message_area       = widget
+        widget.setMinimumHeight( 100 )
         #widget.clicked.connect( self.load    )
         my_layout.addWidget( widget, )
 
@@ -140,7 +106,7 @@ class NoteTab( QWidget ):
     # -------------------------------------
     def save_file( self, file_name ):
         """
-        overrite
+        overwrite
         """
         the_text    = self.message_area.get_plain_text()
 
@@ -161,7 +127,6 @@ class NoteTab( QWidget ):
             index           = tab_widget.indexOf( widget )
 
         except:
-            pass
             return
 
         tab_widget.removeTab( index )
@@ -180,7 +145,6 @@ class NoteTab( QWidget ):
             index           = tab_widget.indexOf( widget )
 
         except:
-            pass
             return
 
         tab_widget.removeTab( index )
@@ -262,5 +226,3 @@ class NoteTab( QWidget ):
 
 
 # ---- eof ---------------------------
-
-

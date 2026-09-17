@@ -7,7 +7,6 @@ launcher for the app
 
 
 import os
-import sys
 
 
 

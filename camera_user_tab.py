@@ -15,35 +15,26 @@ if __name__ == "__main__":
 
 
 # ---- imports
-import sys
 import os
-from   pathlib import Path
-
-from qtpy import QtGui
 
 
 
-from qtpy.QtWidgets import ( QComboBox,
-                             QDoubleSpinBox,
-                             QApplication, QMainWindow,   QLineEdit,   QWidget,
+
+from qtpy.QtWidgets import ( QWidget,
                              QFileDialog,
                              QFrame,
                              QHBoxLayout,
-                             QTabWidget,
                              QLabel,
                              QPushButton,
-                             QSlider,
-                             QSpinBox,
                              QVBoxLayout,
                              )
 
-from qtpy.QtCore import ( Qt, QTimer )
-from qtpy.QtGui  import ( QPainter, QPixmap )
+from qtpy.QtCore import ( Qt )
+from qtpy.QtGui  import ( QPixmap )
 
 
 from    camera_capture_widget import CameraCaptureWidget
 import  parameters
-import  image_overlay_view
 from    app_global import AppGlobal
 
 # ---- constants
@@ -73,16 +64,14 @@ class CameraUserTab( QWidget ):
         and the buttons for examples
         """
         parameters      = AppGlobal.parameters
-
         scope_setups    = parameters.scope_setups.get_setup_dict()
-
 
         layout          = QHBoxLayout(   )
         main_layout.addLayout( layout )
 
         # ---- status line
         # ---- "Snap Photo"
-        a_widget            = QPushButton( "Snap Photo" )
+        a_widget            = QPushButton( "Take Photo" )
         a_widget.clicked.connect( self.on_snap_still )
         self.snap_button    = a_widget
         layout.addWidget( a_widget )
@@ -156,49 +145,6 @@ class CameraUserTab( QWidget ):
         dir_layout.addStretch( 1 )
 
     # ---- the camera controls, all of them this tab's ------------------------
-
-    # -------------------------------------
-    def _build_device_row_old( self, layout ):
-        """
-        what it says -- pick a camera, pick a format, start, stop.  the combos
-        are filled from the widget, see on_camera_list / on_format_list
-        """
-        device_layout       = QHBoxLayout(   )
-        layout.addLayout( device_layout )
-
-        # ---- camera
-        a_widget            = QLabel( "Camera" )
-        device_layout.addWidget( a_widget )
-
-        a_widget            = QComboBox( )
-        self.device_combo   = a_widget
-        a_widget.setMinimumWidth( 240 )
-        a_widget.currentIndexChanged.connect( self.on_device_combo_changed )
-
-        device_layout.addWidget( a_widget )
-
-        a_widget            = QLabel( "Format" )
-        device_layout.addWidget( a_widget )
-
-        a_widget            = QComboBox()
-        self.sensor_widget  = a_widget
-        a_widget.setMinimumWidth( 220 )
-        a_widget.currentIndexChanged.connect( self.on_sensor_widget_changed )
-
-        device_layout.addWidget( a_widget )
-
-
-        device_layout.addStretch( 1 )
-
-        #------- Start
-        # a_widget            = QPushButton( "Start" )
-        # a_widget.clicked.connect( self.on_start_camera )
-        # device_layout.addWidget( a_widget )
-
-        # a_widget            = QPushButton( "Stop" )
-        # a_widget.clicked.connect( self.on_stop_camera )
-        # device_layout.addWidget( a_widget )
-
     # -------------------------------------
     def _build_thumb_column( self, layout ):
         """
@@ -289,6 +235,7 @@ class CameraUserTab( QWidget ):
         what it says
             from controller
             a lot like on_snap_still_old
+
         """
         camera_widget  = self.camera_widget
 
@@ -312,7 +259,6 @@ class CameraUserTab( QWidget ):
         # self._say( f"capture {capture_id} asked for: {file_name}" )  zz
         camera_widget.snap_still( file_name )
 
-        pass  # ? file is not done yet even though snap_still is done need delay of some sort or test
         # may continue in self.on_image_saved ??
 
     # -------------------------------------
@@ -342,7 +288,6 @@ class CameraUserTab( QWidget ):
             fn_no_ext         = controller.get_fn_no_ext()
 
         except ValueError:
-            pass  #  message already issued
             return
 
         file_name    = controller.get_file_name( fn_no_ext, "_p.jpg" )
@@ -351,7 +296,6 @@ class CameraUserTab( QWidget ):
         # self._say( f"capture {capture_id} asked for: {file_name}" )  zz
         camera_widget.snap_still( file_name )
 
-        pass  # file is not done yet even though snap_still is done need delay of some sort or test
         # may continue in self.on_image_saved
 
     # -------------------------------------
@@ -501,7 +445,6 @@ class CameraUserTab( QWidget ):
         ?? add it to a gallery, or to the project's db, or show it in the
            image overlay tab as a base image ?
         """
-        pass
         print( "on_image_saved" )
         if AppGlobal.parameters.auto_load_snap:
             AppGlobal.controller.overlay_tab.load_base_from_last_snap(   )
